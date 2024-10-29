@@ -1,4 +1,4 @@
-package kubeflow_model_registry
+package kubeflowmodelregistry
 
 import (
 	"crypto/tls"
@@ -16,15 +16,17 @@ const (
 	GET_REG_MODEL_URI    = "/registered_models/%s"
 	PATCH_REG_MODEL_URI  = GET_REG_MODEL_URI
 	// CREATE_MODEL_VERSION_URI can also be '/model_versions' if you do not need to create ModelVersion in RegisteredModel
-	CREATE_MODEL_VERSION_URI = "/registered_models/%s/versions"
-	CREATE_MODEL_ART_URI     = "/model_versions/%s/artifacts"
-	LIST_REG_MODEL_URI       = "/registered_models"
-	LIST_MODEL_VERSION_URI   = "/model_versions"
-	GET_MODEL_VERSION_URI    = "/model_versions/%s"
-	PATCH_MODEL_VERSION_URI  = GET_MODEL_VERSION_URI
-	LIST_MODEL_ART_URI       = "/model_artifacts"
-	GET_MODEL_ART_URI        = "/model_artifacts/%s"
-	PATCH_MODEL_ART_URI      = GET_MODEL_ART_URI
+	CREATE_MODEL_VERSION_URI         = "/registered_models/%s/versions"
+	LIST_VERSIONS_OFF_REG_MODELS_URI = CREATE_MODEL_VERSION_URI
+	CREATE_MODEL_ART_URI             = "/model_versions/%s/artifacts"
+	LIST_ARTFIACTS_OFF_VERSIONS_URI  = CREATE_MODEL_VERSION_URI
+	LIST_REG_MODEL_URI               = "/registered_models"
+	LIST_MODEL_VERSION_URI           = "/model_versions"
+	GET_MODEL_VERSION_URI            = "/model_versions/%s"
+	PATCH_MODEL_VERSION_URI          = GET_MODEL_VERSION_URI
+	LIST_MODEL_ART_URI               = "/model_artifacts"
+	GET_MODEL_ART_URI                = "/model_artifacts/%s"
+	PATCH_MODEL_ART_URI              = GET_MODEL_ART_URI
 )
 
 type KubeFlowRESTClientWrapper struct {
@@ -49,23 +51,14 @@ func SetupKubeflowRESTClient(cfg *config.Config) *KubeFlowRESTClientWrapper {
 		os.Exit(1)
 	}
 	tlsCfg := &tls.Config{}
-	if cfg.KubeFlowSkipTLS {
+	if cfg.StoreSkipTLS {
 		tlsCfg.InsecureSkipVerify = true
 	}
 	kubeFlowRESTClient.RESTClient.SetTLSClientConfig(tlsCfg)
-	kubeFlowRESTClient.Token = cfg.KubeFlowToken
-	kubeFlowRESTClient.RootURL = cfg.KubeFlowURL + BASE_URI
+	kubeFlowRESTClient.Token = cfg.StoreToken
+	kubeFlowRESTClient.RootURL = cfg.StoreURL + BASE_URI
 
 	return kubeFlowRESTClient
-}
-
-func marshalBody(v any) string {
-	jb, err := json.Marshal(v)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "json marshal err %s", err.Error())
-		return ""
-	}
-	return string(jb)
 }
 
 func (k *KubeFlowRESTClientWrapper) processUpdate(resp *resty.Response, action, url, body string) (string, error) {
@@ -127,11 +120,18 @@ func (k *KubeFlowRESTClientWrapper) processFetch(resp *resty.Response, url, acti
 	return string(jb), nil
 }
 
-func (k *KubeFlowRESTClientWrapper) getFromModelRegistry(url string) (string, error) {
+func (k *KubeFlowRESTClientWrapper) getFromModelRegistry(url string) ([]byte, error) {
 	resp, err := kubeFlowRESTClient.RESTClient.R().SetAuthToken(k.Token).Get(url)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return k.processFetch(resp, url, "get")
+	rc := resp.StatusCode()
+	getResp := resp.String()
+	if rc != 200 {
+		return nil, fmt.Errorf("get for %s rc %d body %s\n", url, rc, getResp)
+	} else {
+		klog.V(4).Infof("get for %s returned ok\n", url)
+	}
+	return resp.Body(), err
 
 }

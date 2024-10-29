@@ -8,11 +8,13 @@ require (
 	github.com/kubeflow/model-registry v0.2.5-alpha
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
+	github.com/tdabasinskas/go-backstage/v2 v2.5.1
 	k8s.io/apimachinery v0.28.4
 	k8s.io/cli-runtime v0.28.4
 	k8s.io/client-go v0.28.4
 	k8s.io/klog/v2 v2.110.1
 	k8s.io/kubectl v0.28.4
+	sigs.k8s.io/yaml v1.4.0
 )
 
 require (
@@ -112,5 +114,4 @@ require (
 	sigs.k8s.io/kustomize/api v0.13.5-0.20230601165947-6ce0bf390ce3 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.14.3-0.20230601165947-6ce0bf390ce3 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
-	sigs.k8s.io/yaml v1.4.0 // indirect
 )
