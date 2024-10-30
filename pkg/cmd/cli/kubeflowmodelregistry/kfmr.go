@@ -273,7 +273,8 @@ func (pop *apiPopulator) GetDependencyOf() []string {
 }
 
 func (pop *apiPopulator) GetDefinition() string {
-	return ""
+	// definition must be set to something to pass backstage validation
+	return "no-definition-yet"
 }
 
 func (pop *apiPopulator) GetTechdocRef() string {
