@@ -133,6 +133,7 @@ func callBackstagePrinters(owner, lifecycle string, rm *openapi.RegisteredModel,
 
 	apiPop := apiPopulator{}
 	apiPop.owner = owner
+	apiPop.lifecycle = lifecycle
 	apiPop.registeredModel = rm
 	apiPop.modelVersions = mv
 	apiPop.modelArtifacts = ma
