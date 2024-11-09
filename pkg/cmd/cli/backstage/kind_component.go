@@ -1,10 +1,5 @@
 package backstage
 
-import (
-	"context"
-	"net/http"
-)
-
 // KindComponent defines name for component kind.
 const KindComponent = "Component"
 
@@ -49,21 +44,4 @@ type ComponentEntityV1alpha1Spec struct {
 
 	// System is an array of references to other entities that the component depends on to function.
 	System string `json:"system,omitempty" yaml:"system,omitempty"`
-}
-
-// componentService handles communication with the component related methods of the Backstage Catalog API.
-type componentService typedEntityService[ComponentEntityV1alpha1]
-
-// newComponentService returns a new instance of component-type entityService.
-func newComponentService(s *entityService) *componentService {
-	return &componentService{
-		client:  s.client,
-		apiPath: s.apiPath,
-	}
-}
-
-// Get returns a component entity identified by the name and the namespace ("default", if not specified) it belongs to.
-func (s *componentService) Get(ctx context.Context, n string, ns string) (*ComponentEntityV1alpha1, *http.Response, error) {
-	cs := (typedEntityService[ComponentEntityV1alpha1])(*s)
-	return cs.get(ctx, KindComponent, n, ns)
 }

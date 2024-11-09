@@ -5,15 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	clibkstg "github.com/gabemontero/backstage-ai-cli/pkg/cmd/cli/backstage"
+	"github.com/gabemontero/backstage-ai-cli/pkg/cmd/cli/backstage"
 	"github.com/gabemontero/backstage-ai-cli/pkg/config"
 	"github.com/gabemontero/backstage-ai-cli/pkg/util"
 	serverapiv1beta1 "github.com/kserve/kserve/pkg/apis/serving/v1beta1"
-	servingv1beta1 "github.com/kserve/kserve/pkg/client/clientset/versioned/typed/serving/v1beta1"
 	"github.com/spf13/cobra"
-	"github.com/tdabasinskas/go-backstage/v2/backstage"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
+	"os"
 	"strings"
 )
 
@@ -46,9 +45,9 @@ func (pop *commonPopulator) GetLinks() []backstage.EntityLink {
 	if pop.is.Status.URL != nil {
 		links = append(links, backstage.EntityLink{
 			URL:   pop.is.Status.URL.String(),
-			Title: clibkstg.LINK_API_URL,
-			Type:  clibkstg.LINK_TYPE_WEBSITE,
-			Icon:  clibkstg.LINK_ICON_WEBASSET,
+			Title: backstage.LINK_API_URL,
+			Type:  backstage.LINK_TYPE_WEBSITE,
+			Icon:  backstage.LINK_ICON_WEBASSET,
 		})
 	}
 	for componentType, componentStatus := range pop.is.Status.Components {
@@ -57,30 +56,30 @@ func (pop *commonPopulator) GetLinks() []backstage.EntityLink {
 			links = append(links, backstage.EntityLink{
 				URL:   componentStatus.URL.String() + "/docs",
 				Title: string(componentType) + " FastAPI URL",
-				Icon:  clibkstg.LINK_ICON_WEBASSET,
-				Type:  clibkstg.LINK_TYPE_WEBSITE,
+				Icon:  backstage.LINK_ICON_WEBASSET,
+				Type:  backstage.LINK_TYPE_WEBSITE,
 			})
 			links = append(links, backstage.EntityLink{
 				URL:   componentStatus.URL.String(),
 				Title: string(componentType) + " model serving URL",
-				Icon:  clibkstg.LINK_ICON_WEBASSET,
-				Type:  clibkstg.LINK_TYPE_WEBSITE,
+				Icon:  backstage.LINK_ICON_WEBASSET,
+				Type:  backstage.LINK_TYPE_WEBSITE,
 			})
 		}
 		if componentStatus.RestURL != nil {
 			links = append(links, backstage.EntityLink{
 				URL:   componentStatus.RestURL.String(),
 				Title: string(componentType) + " REST model serving URL",
-				Icon:  clibkstg.LINK_ICON_WEBASSET,
-				Type:  clibkstg.LINK_TYPE_WEBSITE,
+				Icon:  backstage.LINK_ICON_WEBASSET,
+				Type:  backstage.LINK_TYPE_WEBSITE,
 			})
 		}
 		if componentStatus.GrpcURL != nil {
 			links = append(links, backstage.EntityLink{
 				URL:   componentStatus.GrpcURL.String(),
 				Title: string(componentType) + " GRPC model serving URL",
-				Icon:  clibkstg.LINK_ICON_WEBASSET,
-				Type:  clibkstg.LINK_TYPE_WEBSITE,
+				Icon:  backstage.LINK_ICON_WEBASSET,
+				Type:  backstage.LINK_TYPE_WEBSITE,
 			})
 		}
 	}
@@ -179,18 +178,44 @@ func (pop *apiPopulator) GetTechdocRef() string {
 	return "api/"
 }
 
+func SetupKServeClient(cfg *config.Config) {
+	if cfg == nil {
+		klog.Error("Command config is nil")
+		klog.Flush()
+		os.Exit(1)
+	}
+	if cfg.ServingClient != nil {
+		return
+	}
+	if kubeconfig, err := util.GetK8sConfig(cfg); err != nil {
+		err = fmt.Errorf("problem with kubeconfig: %s", err.Error())
+		klog.Errorf("%s", err.Error())
+		klog.Flush()
+		os.Exit(1)
+	} else {
+		cfg.ServingClient = util.GetKServeClient(kubeconfig)
+	}
+
+	namespace := cfg.Namespace
+	if len(namespace) == 0 {
+		cfg.Namespace = util.GetCurrentProject()
+	}
+
+}
+
 func NewCmd(cfg *config.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "kserve",
 		Short: "KServe related API",
 		Long:  "Interact with KServe related instances on a K8s cluster to manage AI related catalog entities in a Backstage instance.",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ids := []string{}
 
 			if len(args) < 2 {
-				klog.Errorf("ERROR: need to specify an owner and lifecycle setting")
+				err := fmt.Errorf("need to specify an owner and lifecycle setting")
+				klog.Errorf("%s", err.Error())
 				klog.Flush()
-				return
+				return err
 			}
 			owner := args[0]
 			lifecycle := args[1]
@@ -199,60 +224,53 @@ func NewCmd(cfg *config.Config) *cobra.Command {
 				ids = args[2:]
 			}
 
-			var servingClient servingv1beta1.ServingV1beta1Interface
-			if kubeconfig, err := util.GetK8sConfig(cfg); err != nil {
-				klog.Errorf("ERROR: problem with kubeconfig: %v\n", err)
-				klog.Flush()
-				return
-			} else {
-				servingClient = util.GetKServeClient(kubeconfig)
-			}
-
+			SetupKServeClient(cfg)
 			namespace := cfg.Namespace
-			if len(namespace) == 0 {
-				namespace = util.GetCurrentProject()
-			}
+			servingClient := cfg.ServingClient
+
 			if len(ids) != 0 {
 				for _, id := range ids {
 					is, err := servingClient.InferenceServices(namespace).Get(context.Background(), id, metav1.GetOptions{})
 					if err != nil {
-						klog.Errorf("ERROR: inference service retrieval error for %s:%s: %s\n", namespace, id, err.Error())
+						klog.Errorf("inference service retrieval error for %s:%s: %s", namespace, id, err.Error())
 						klog.Flush()
-						return
+						return err
 					}
 
-					err = callBackstagePrinters(owner, lifecycle, is)
+					err = callBackstagePrinters(owner, lifecycle, is, cmd)
 					if err != nil {
-						return
+						return err
 					}
 				}
 			} else {
 				isl, err := servingClient.InferenceServices(namespace).List(context.Background(), metav1.ListOptions{})
 				if err != nil {
-					klog.Errorf("ERROR: inference service retrieval error for %s: %s\n", namespace, err.Error())
+					klog.Errorf("inference service retrieval error for %s: %s", namespace, err.Error())
 					klog.Flush()
-					return
+					return err
 				}
 				for _, is := range isl.Items {
-					err = callBackstagePrinters(owner, lifecycle, &is)
+					err = callBackstagePrinters(owner, lifecycle, &is, cmd)
 					if err != nil {
-						return
+						klog.Errorf("%s", err.Error())
+						klog.Flush()
+						return err
 					}
 				}
 			}
-
+			return nil
 		},
 	}
 
 	return cmd
 }
 
-func callBackstagePrinters(owner, lifecycle string, is *serverapiv1beta1.InferenceService) error {
+func callBackstagePrinters(owner, lifecycle string, is *serverapiv1beta1.InferenceService, cmd *cobra.Command) error {
 	compPop := componentPopulator{}
 	compPop.owner = owner
 	compPop.lifecycle = lifecycle
 	compPop.is = is
-	err := clibkstg.PrintComponent(&compPop)
+	err := backstage.PrintComponent(&compPop, cmd)
 	if err != nil {
 		return err
 	}
@@ -261,7 +279,7 @@ func callBackstagePrinters(owner, lifecycle string, is *serverapiv1beta1.Inferen
 	resPop.owner = owner
 	resPop.lifecycle = lifecycle
 	resPop.is = is
-	err = clibkstg.PrintResource(&resPop)
+	err = backstage.PrintResource(&resPop, cmd)
 	if err != nil {
 		return err
 	}
@@ -270,6 +288,6 @@ func callBackstagePrinters(owner, lifecycle string, is *serverapiv1beta1.Inferen
 	apiPop.owner = owner
 	apiPop.lifecycle = lifecycle
 	apiPop.is = is
-	err = clibkstg.PrintAPI(&apiPop)
+	err = backstage.PrintAPI(&apiPop, cmd)
 	return err
 }

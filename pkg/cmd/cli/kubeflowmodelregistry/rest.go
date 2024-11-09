@@ -11,22 +11,13 @@ import (
 )
 
 const (
-	BASE_URI             = "/api/model_registry/v1alpha3"
-	CREATE_REG_MODEL_URI = "/registered_models"
-	GET_REG_MODEL_URI    = "/registered_models/%s"
-	PATCH_REG_MODEL_URI  = GET_REG_MODEL_URI
-	// CREATE_MODEL_VERSION_URI can also be '/model_versions' if you do not need to create ModelVersion in RegisteredModel
-	CREATE_MODEL_VERSION_URI         = "/registered_models/%s/versions"
-	LIST_VERSIONS_OFF_REG_MODELS_URI = CREATE_MODEL_VERSION_URI
-	CREATE_MODEL_ART_URI             = "/model_versions/%s/artifacts"
-	LIST_ARTFIACTS_OFF_VERSIONS_URI  = CREATE_MODEL_VERSION_URI
+	BASE_URI                         = "/api/model_registry/v1alpha3"
+	GET_REG_MODEL_URI                = "/registered_models/%s"
+	LIST_VERSIONS_OFF_REG_MODELS_URI = "/registered_models/%s/versions"
+	LIST_ARTFIACTS_OFF_VERSIONS_URI  = "/model_versions/%s/artifacts"
 	LIST_REG_MODEL_URI               = "/registered_models"
-	LIST_MODEL_VERSION_URI           = "/model_versions"
-	GET_MODEL_VERSION_URI            = "/model_versions/%s"
-	PATCH_MODEL_VERSION_URI          = GET_MODEL_VERSION_URI
-	LIST_MODEL_ART_URI               = "/model_artifacts"
-	GET_MODEL_ART_URI                = "/model_artifacts/%s"
-	PATCH_MODEL_ART_URI              = GET_MODEL_ART_URI
+	LIST_ALL_MODEL_VERSIONS_URI      = "/model_versions"
+	LIST_ALL_MODEL_ARTIFACTS_URI     = "/model_artifacts"
 )
 
 type KubeFlowRESTClientWrapper struct {
@@ -35,19 +26,25 @@ type KubeFlowRESTClientWrapper struct {
 	Token      string
 }
 
-var kubeFlowRESTClient = &KubeFlowRESTClientWrapper{}
-
-func init() {
-	kubeFlowRESTClient.RESTClient = resty.New()
-	if kubeFlowRESTClient == nil {
-		klog.Errorf("Unable to get Kubeflow REST client wrapper")
-		os.Exit(1)
-	}
-}
-
 func SetupKubeflowRESTClient(cfg *config.Config) *KubeFlowRESTClientWrapper {
 	if cfg == nil {
 		klog.Error("Command config is nil")
+		klog.Flush()
+		os.Exit(1)
+	}
+	kubeFlowRESTClient := &KubeFlowRESTClientWrapper{
+		Token:      cfg.StoreToken,
+		RootURL:    cfg.StoreURL + BASE_URI,
+		RESTClient: cfg.KubeflowRESTClient,
+	}
+	if cfg.KubeflowRESTClient != nil {
+		return kubeFlowRESTClient
+	}
+	cfg.KubeflowRESTClient = resty.New()
+	kubeFlowRESTClient.RESTClient = cfg.KubeflowRESTClient
+	if cfg.KubeflowRESTClient == nil {
+		klog.Errorf("Unable to get Kubeflow REST client wrapper")
+		klog.Flush()
 		os.Exit(1)
 	}
 	tlsCfg := &tls.Config{}
@@ -55,8 +52,6 @@ func SetupKubeflowRESTClient(cfg *config.Config) *KubeFlowRESTClientWrapper {
 		tlsCfg.InsecureSkipVerify = true
 	}
 	kubeFlowRESTClient.RESTClient.SetTLSClientConfig(tlsCfg)
-	kubeFlowRESTClient.Token = cfg.StoreToken
-	kubeFlowRESTClient.RootURL = cfg.StoreURL + BASE_URI
 
 	return kubeFlowRESTClient
 }
@@ -88,7 +83,7 @@ func (k *KubeFlowRESTClientWrapper) processBody(resp *resty.Response) (string, e
 }
 
 func (k *KubeFlowRESTClientWrapper) postToModelRegistry(url, body string) (string, error) {
-	resp, err := kubeFlowRESTClient.RESTClient.R().SetAuthToken(k.Token).SetBody(body).Post(url)
+	resp, err := k.RESTClient.R().SetAuthToken(k.Token).SetBody(body).Post(url)
 	if err != nil {
 		return "", err
 	}
@@ -97,7 +92,7 @@ func (k *KubeFlowRESTClientWrapper) postToModelRegistry(url, body string) (strin
 }
 
 func (k *KubeFlowRESTClientWrapper) patchToModelRegistry(url, body string) (string, error) {
-	resp, err := kubeFlowRESTClient.RESTClient.R().SetAuthToken(k.Token).SetBody(body).Patch(url)
+	resp, err := k.RESTClient.R().SetAuthToken(k.Token).SetBody(body).Patch(url)
 	if err != nil {
 		return "", err
 	}
@@ -115,13 +110,13 @@ func (k *KubeFlowRESTClientWrapper) processFetch(resp *resty.Response, url, acti
 	}
 	jb, err := json.MarshalIndent(getResp, "", "    ")
 	if err != nil {
-		fmt.Fprint(os.Stderr, "marshall indent error for %s: %s", getResp, err.Error())
+		fmt.Fprintf(os.Stderr, "marshall indent error for %s: %s", getResp, err.Error())
 	}
 	return string(jb), nil
 }
 
 func (k *KubeFlowRESTClientWrapper) getFromModelRegistry(url string) ([]byte, error) {
-	resp, err := kubeFlowRESTClient.RESTClient.R().SetAuthToken(k.Token).Get(url)
+	resp, err := k.RESTClient.R().SetAuthToken(k.Token).Get(url)
 	if err != nil {
 		return nil, err
 	}

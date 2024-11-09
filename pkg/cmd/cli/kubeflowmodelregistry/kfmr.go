@@ -2,11 +2,10 @@ package kubeflowmodelregistry
 
 import (
 	"fmt"
-	clibkstg "github.com/gabemontero/backstage-ai-cli/pkg/cmd/cli/backstage"
+	"github.com/gabemontero/backstage-ai-cli/pkg/cmd/cli/backstage"
 	"github.com/gabemontero/backstage-ai-cli/pkg/config"
 	"github.com/kubeflow/model-registry/pkg/openapi"
 	"github.com/spf13/cobra"
-	"github.com/tdabasinskas/go-backstage/v2/backstage"
 	"k8s.io/klog/v2"
 )
 
@@ -16,13 +15,14 @@ func NewCmd(cfg *config.Config) *cobra.Command {
 		Aliases: []string{"kf"},
 		Short:   "Kubeflow Model Registry related API",
 		Long:    "Interact with the Kubeflow Model Registry REST API as part of managing AI related catalog entities in a Backstage instance.",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ids := []string{}
 
 			if len(args) < 2 {
-				klog.Errorf("ERROR: need to specify an owner and lifecycle setting")
+				err := fmt.Errorf("need to specify an owner and lifecycle setting")
+				klog.Errorf("%s", err.Error())
 				klog.Flush()
-				return
+				return err
 			}
 			owner := args[0]
 			lifecycle := args[1]
@@ -38,44 +38,46 @@ func NewCmd(cfg *config.Config) *cobra.Command {
 				var rms []openapi.RegisteredModel
 				rms, err = kfmr.ListRegisteredModels()
 				if err != nil {
-					klog.Errorf("ERROR: list registered models error: %s", err.Error())
+					klog.Errorf("list registered models error: %s", err.Error())
 					klog.Flush()
-					return
+					return err
 				}
 				for _, rm := range rms {
 					var mvs []openapi.ModelVersion
 					var mas map[string][]openapi.ModelArtifact
 					mvs, mas, err = callKubeflowREST(*rm.Id, kfmr)
 					if err != nil {
-						return
-					}
-					err = callBackstagePrinters(owner, lifecycle, &rm, mvs, mas)
-					if err != nil {
-						klog.Errorf("ERROR: print model catalog: %s", err.Error())
+						klog.Errorf("%s", err.Error())
 						klog.Flush()
-						return
+						return err
+					}
+					err = callBackstagePrinters(owner, lifecycle, &rm, mvs, mas, cmd)
+					if err != nil {
+						klog.Errorf("print model catalog: %s", err.Error())
+						klog.Flush()
+						return err
 					}
 				}
 			} else {
 				for _, id := range ids {
 					rm, err := kfmr.GetRegisteredModel(id)
 					if err != nil {
-						klog.Errorf("ERROR: get registered model error for %s: %s", id, err.Error())
+						klog.Errorf("get registered model error for %s: %s", id, err.Error())
 						klog.Flush()
-						return
+						return err
 					}
 					var mvs []openapi.ModelVersion
 					var mas map[string][]openapi.ModelArtifact
 					mvs, mas, err = callKubeflowREST(*rm.Id, kfmr)
 					if err != nil {
-						klog.Errorf("ERROR: get model version/artifact error for %s: %s", id, err.Error())
+						klog.Errorf("get model version/artifact error for %s: %s", id, err.Error())
 						klog.Flush()
-						return
+						return err
 					}
-					err = callBackstagePrinters(owner, lifecycle, rm, mvs, mas)
+					err = callBackstagePrinters(owner, lifecycle, rm, mvs, mas, cmd)
 				}
 			}
-
+			return nil
 		},
 	}
 
@@ -108,14 +110,14 @@ func callKubeflowREST(id string, kfmr *KubeFlowRESTClientWrapper) (mvs []openapi
 	return
 }
 
-func callBackstagePrinters(owner, lifecycle string, rm *openapi.RegisteredModel, mv []openapi.ModelVersion, ma map[string][]openapi.ModelArtifact) error {
+func callBackstagePrinters(owner, lifecycle string, rm *openapi.RegisteredModel, mv []openapi.ModelVersion, ma map[string][]openapi.ModelArtifact, cmd *cobra.Command) error {
 	compPop := componentPopulator{}
 	compPop.owner = owner
 	compPop.lifecycle = lifecycle
 	compPop.registeredModel = rm
 	compPop.modelVersions = mv
 	compPop.modelArtifacts = ma
-	err := clibkstg.PrintComponent(&compPop)
+	err := backstage.PrintComponent(&compPop, cmd)
 	if err != nil {
 		return err
 	}
@@ -126,7 +128,7 @@ func callBackstagePrinters(owner, lifecycle string, rm *openapi.RegisteredModel,
 	resPop.registeredModel = rm
 	resPop.modelVersions = mv
 	resPop.modelArtifacts = ma
-	err = clibkstg.PrintResource(&resPop)
+	err = backstage.PrintResource(&resPop, cmd)
 	if err != nil {
 		return err
 	}
@@ -137,7 +139,7 @@ func callBackstagePrinters(owner, lifecycle string, rm *openapi.RegisteredModel,
 	apiPop.registeredModel = rm
 	apiPop.modelVersions = mv
 	apiPop.modelArtifacts = ma
-	err = clibkstg.PrintAPI(&apiPop)
+	err = backstage.PrintAPI(&apiPop, cmd)
 	return err
 }
 
@@ -158,10 +160,6 @@ func (pop *commonPopulator) GetOwner() string {
 
 func (pop *commonPopulator) GetLifecycle() string {
 	return pop.lifecycle
-}
-
-func (pop *commonPopulator) GetName() string {
-	return pop.registeredModel.Name
 }
 
 func (pop *commonPopulator) GetDescription() string {
@@ -185,6 +183,10 @@ func (pop *commonPopulator) GetProvidedAPIs() []string {
 
 type componentPopulator struct {
 	commonPopulator
+}
+
+func (pop *componentPopulator) GetName() string {
+	return pop.registeredModel.Name
 }
 
 // TODO Until we get the inferenceservice endpoint URL associated with the model registry related API won't have component links
@@ -222,6 +224,10 @@ type resourcePopulator struct {
 	commonPopulator
 }
 
+func (pop *resourcePopulator) GetName() string {
+	return pop.modelVersions[0].Name
+}
+
 func (pop *resourcePopulator) GetTechdocRef() string {
 	return "resource/"
 }
@@ -234,8 +240,8 @@ func (pop *resourcePopulator) GetLinks() []backstage.EntityLink {
 				links = append(links, backstage.EntityLink{
 					URL:   *ma.Uri,
 					Title: ma.GetDescription(),
-					Icon:  clibkstg.LINK_ICON_WEBASSET,
-					Type:  clibkstg.LINK_TYPE_WEBSITE,
+					Icon:  backstage.LINK_ICON_WEBASSET,
+					Type:  backstage.LINK_TYPE_WEBSITE,
 				})
 			}
 		}
@@ -267,6 +273,11 @@ func (pop *resourcePopulator) GetDependencyOf() []string {
 // TODO Until we get the inferenceservice endpoint URL associated with the model registry related API won't have much for Backstage API here
 type apiPopulator struct {
 	commonPopulator
+}
+
+func (pop *apiPopulator) GetName() string {
+	mas := pop.modelArtifacts[*pop.modelVersions[0].Id]
+	return *mas[0].Name
 }
 
 func (pop *apiPopulator) GetDependencyOf() []string {

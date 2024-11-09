@@ -1,10 +1,5 @@
 package backstage
 
-import (
-	"context"
-	"net/http"
-)
-
 // KindResource defines name for resource kind.
 const KindResource = "Resource"
 
@@ -43,21 +38,4 @@ type ResourceEntityV1alpha1Spec struct {
 
 	// System is an entity reference to the system that the resource belongs to.
 	System string `json:"system,omitempty" yaml:"system,omitempty"`
-}
-
-// resourceService handles communication with the resource related methods of the Backstage Catalog API.
-type resourceService typedEntityService[ResourceEntityV1alpha1]
-
-// newResourceService returns a new instance of resource-type entityService.
-func newResourceService(s *entityService) *resourceService {
-	return &resourceService{
-		client:  s.client,
-		apiPath: s.apiPath,
-	}
-}
-
-// Get returns a resource entity identified by the name and the namespace ("default", if not specified) it belongs to.
-func (s *resourceService) Get(ctx context.Context, n string, ns string) (*ResourceEntityV1alpha1, *http.Response, error) {
-	cs := (typedEntityService[ResourceEntityV1alpha1])(*s)
-	return cs.get(ctx, KindResource, n, ns)
 }

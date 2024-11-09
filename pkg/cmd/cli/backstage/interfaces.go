@@ -2,7 +2,7 @@ package backstage
 
 import (
 	"github.com/gabemontero/backstage-ai-cli/pkg/util"
-	"github.com/tdabasinskas/go-backstage/v2/backstage"
+	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
 )
 
@@ -11,7 +11,7 @@ type CommonPopulator interface {
 	GetLifecycle() string
 	GetName() string
 	GetDescription() string
-	GetLinks() []backstage.EntityLink
+	GetLinks() []EntityLink
 	GetTags() []string
 	GetDisplayName() string
 	GetProvidedAPIs() []string
@@ -34,15 +34,15 @@ type APIPopulator interface {
 	GetDependencyOf() []string
 }
 
-func PrintComponent(pop ComponentPopulator) error {
-	component := &backstage.ComponentEntityV1alpha1{
+func PrintComponent(pop ComponentPopulator, cmd *cobra.Command) error {
+	component := &ComponentEntityV1alpha1{
 		Kind:       "Component",
 		ApiVersion: VERSION,
 		Entity:     buildEntity("Component", pop),
 	}
 	component.Entity.Metadata.Annotations = map[string]string{TECHDOC_REFS: pop.GetTechdocRef()}
 	component.Metadata = component.Entity.Metadata
-	component.Spec = &backstage.ComponentEntityV1alpha1Spec{
+	component.Spec = &ComponentEntityV1alpha1Spec{
 		Type:         COMPONENT_TYPE,
 		Lifecycle:    pop.GetLifecycle(),
 		Owner:        "user:" + pop.GetOwner(),
@@ -50,7 +50,7 @@ func PrintComponent(pop ComponentPopulator) error {
 		DependsOn:    pop.GetDependsOn(),
 		//TODO this version of the converted to Golang does not have `profile` with `displayName`
 	}
-	err := util.PrintYaml(component, true)
+	err := util.PrintYaml(component, true, cmd)
 	if err != nil {
 		klog.Errorf("ERROR: converting component to yaml and printing: %s, %#v", err.Error(), component)
 		return err
@@ -58,24 +58,22 @@ func PrintComponent(pop ComponentPopulator) error {
 	return nil
 }
 
-func PrintResource(pop ResourcePopulator) error {
-	resource := &backstage.ResourceEntityV1alpha1{
+func PrintResource(pop ResourcePopulator, cmd *cobra.Command) error {
+	resource := &ResourceEntityV1alpha1{
 		Kind:       "Resource",
 		ApiVersion: VERSION,
 		Entity:     buildEntity("Resource", pop),
 	}
 	resource.Entity.Metadata.Annotations = map[string]string{TECHDOC_REFS: pop.GetTechdocRef()}
 	resource.Metadata = resource.Entity.Metadata
-	resource.Spec = &backstage.ResourceEntityV1alpha1Spec{
+	resource.Spec = &ResourceEntityV1alpha1Spec{
 		Type:         RESOURCE_TYPE,
 		Owner:        "user:" + pop.GetOwner(),
 		Lifecycle:    pop.GetLifecycle(),
 		ProvidesApis: pop.GetProvidedAPIs(),
 		DependencyOf: pop.GetDependencyOf(),
-		//TODO this version of the converted to Golang does not have `profile` with `displayName`
-		//TODO Patched for dependecyOf, providesApis, lifecycle (problem is backstage schema has not been updated)
 	}
-	err := util.PrintYaml(resource, true)
+	err := util.PrintYaml(resource, true, cmd)
 	if err != nil {
 		klog.Errorf("ERROR: converting resource to yaml and printing: %s, %#v", err.Error(), resource)
 		return err
@@ -83,24 +81,22 @@ func PrintResource(pop ResourcePopulator) error {
 	return nil
 }
 
-func PrintAPI(pop APIPopulator) error {
-	api := &backstage.ApiEntityV1alpha1{
+func PrintAPI(pop APIPopulator, cmd *cobra.Command) error {
+	api := &ApiEntityV1alpha1{
 		Kind:       "API",
 		ApiVersion: VERSION,
 		Entity:     buildEntity("API", pop),
 	}
 	api.Entity.Metadata.Annotations = map[string]string{TECHDOC_REFS: pop.GetTechdocRef()}
 	api.Metadata = api.Entity.Metadata
-	api.Spec = &backstage.ApiEntityV1alpha1Spec{
+	api.Spec = &ApiEntityV1alpha1Spec{
 		Type:         API_TYPE,
 		Lifecycle:    pop.GetLifecycle(),
 		Owner:        "user:" + pop.GetOwner(),
 		Definition:   pop.GetDefinition(),
 		DependencyOf: pop.GetDependencyOf(),
-		//TODO this version of the converted to Golang does not have `profile` with `displayName`
-		//TODO Patced for dependecyOf
 	}
-	err := util.PrintYaml(api, false)
+	err := util.PrintYaml(api, false, cmd)
 	if err != nil {
 		klog.Errorf("ERROR: converting api to yaml and printing: %s, %#v", err.Error(), api)
 		return err
@@ -108,11 +104,11 @@ func PrintAPI(pop APIPopulator) error {
 	return nil
 }
 
-func buildEntity(kind string, pop CommonPopulator) backstage.Entity {
-	entity := backstage.Entity{
+func buildEntity(kind string, pop CommonPopulator) Entity {
+	entity := Entity{
 		Kind:       kind,
 		ApiVersion: VERSION,
-		Metadata: backstage.EntityMeta{
+		Metadata: EntityMeta{
 			Name:        pop.GetName(),
 			Description: pop.GetDescription(),
 			Tags:        pop.GetTags(),

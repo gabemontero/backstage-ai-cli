@@ -240,8 +240,10 @@ github.com/kserve/kserve/pkg/agent/storage
 github.com/kserve/kserve/pkg/apis/serving/v1alpha1
 github.com/kserve/kserve/pkg/apis/serving/v1beta1
 github.com/kserve/kserve/pkg/client/clientset/versioned
+github.com/kserve/kserve/pkg/client/clientset/versioned/fake
 github.com/kserve/kserve/pkg/client/clientset/versioned/scheme
 github.com/kserve/kserve/pkg/client/clientset/versioned/typed/serving/v1beta1
+github.com/kserve/kserve/pkg/client/clientset/versioned/typed/serving/v1beta1/fake
 github.com/kserve/kserve/pkg/constants
 github.com/kserve/kserve/pkg/credentials/gcs
 github.com/kserve/kserve/pkg/credentials/s3
@@ -319,9 +321,6 @@ github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 ## explicit; go 1.12
 github.com/spf13/pflag
-# github.com/tdabasinskas/go-backstage/v2 v2.5.1
-## explicit; go 1.23
-github.com/tdabasinskas/go-backstage/v2/backstage
 # github.com/xlab/treeprint v1.2.0
 ## explicit; go 1.13
 github.com/xlab/treeprint
@@ -754,7 +753,9 @@ k8s.io/client-go/applyconfigurations/storage/v1beta1
 k8s.io/client-go/discovery
 k8s.io/client-go/discovery/cached/disk
 k8s.io/client-go/discovery/cached/memory
+k8s.io/client-go/discovery/fake
 k8s.io/client-go/dynamic
+k8s.io/client-go/dynamic/fake
 k8s.io/client-go/kubernetes
 k8s.io/client-go/kubernetes/scheme
 k8s.io/client-go/kubernetes/typed/admissionregistration/v1
@@ -833,6 +834,7 @@ k8s.io/client-go/scale/scheme/appsv1beta2
 k8s.io/client-go/scale/scheme/autoscalingv1
 k8s.io/client-go/scale/scheme/extensionsint
 k8s.io/client-go/scale/scheme/extensionsv1beta1
+k8s.io/client-go/testing
 k8s.io/client-go/third_party/forked/golang/template
 k8s.io/client-go/tools/auth
 k8s.io/client-go/tools/cache

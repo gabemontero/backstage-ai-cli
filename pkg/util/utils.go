@@ -2,20 +2,20 @@ package util
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/printers"
-	"os"
 	"sigs.k8s.io/yaml"
 )
 
-func PrintYaml(obj interface{}, addDivider bool) error {
-	writer := printers.GetNewTabWriter(os.Stdout)
+func PrintYaml(obj interface{}, addDivider bool, cmd *cobra.Command) error {
+	writer := printers.GetNewTabWriter(cmd.OutOrStdout())
 	output, err := yaml.Marshal(obj)
 	if err != nil {
 		return err
 	}
 	_, err = writer.Write(output)
 	if addDivider {
-		fmt.Fprintln(os.Stdout, "---")
+		fmt.Fprintln(cmd.OutOrStdout(), "---")
 	}
 	return err
 }

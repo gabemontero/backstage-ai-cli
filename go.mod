@@ -8,7 +8,6 @@ require (
 	github.com/kubeflow/model-registry v0.2.5-alpha
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
-	github.com/tdabasinskas/go-backstage/v2 v2.5.1
 	k8s.io/apimachinery v0.28.4
 	k8s.io/cli-runtime v0.28.4
 	k8s.io/client-go v0.28.4

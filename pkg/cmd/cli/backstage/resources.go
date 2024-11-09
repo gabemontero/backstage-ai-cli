@@ -4,15 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/tdabasinskas/go-backstage/v2/backstage"
 	"net/url"
 	"strings"
 )
 
 type listResources struct {
-	Items      []backstage.ResourceEntityV1alpha1 `json:"items" yaml:"items"`
-	TotalItems int                                `json:"totalItems" yaml:"totalItems"`
-	PageInfo   interface{}                        `json:"pageInfo" yaml:"pageInfo"`
+	Items      []ResourceEntityV1alpha1 `json:"items" yaml:"items"`
+	TotalItems int                      `json:"totalItems" yaml:"totalItems"`
+	PageInfo   interface{}              `json:"pageInfo" yaml:"pageInfo"`
 }
 
 func (b *BackstageRESTClientWrapper) ListResources(qparms *url.Values) (string, error) {
@@ -34,7 +33,7 @@ func (b *BackstageRESTClientWrapper) ListResources(qparms *url.Values) (string, 
 
 	//TODO remove this post query filter logic if an exact query parameter check for the 'metadata.tags' array is determined
 	if b.Tags && !b.Subset {
-		filteredResources := []backstage.ResourceEntityV1alpha1{}
+		filteredResources := []ResourceEntityV1alpha1{}
 		for _, resource := range lr.Items {
 			if tagsMatch(argsArr, resource.Metadata.Tags) {
 				filteredResources = append(filteredResources, resource)

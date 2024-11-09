@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/tdabasinskas/go-backstage/v2/backstage"
 	"net/url"
 )
 
 type listComponents struct {
-	Items      []backstage.ComponentEntityV1alpha1 `json:"items" yaml:"items"`
-	TotalItems int                                 `json:"totalItems" yaml:"totalItems"`
-	PageInfo   interface{}                         `json:"pageInfo" yaml:"pageInfo"`
+	Items      []ComponentEntityV1alpha1 `json:"items" yaml:"items"`
+	TotalItems int                       `json:"totalItems" yaml:"totalItems"`
+	PageInfo   interface{}               `json:"pageInfo" yaml:"pageInfo"`
 }
 
 func (b *BackstageRESTClientWrapper) ListComponents(qparms *url.Values) (string, error) {
@@ -33,7 +32,7 @@ func (b *BackstageRESTClientWrapper) ListComponents(qparms *url.Values) (string,
 
 	//TODO remove this post query filter logic if an exact query parameter check for the 'metadata.tags' array is determined
 	if b.Tags && !b.Subset {
-		filteredComponents := []backstage.ComponentEntityV1alpha1{}
+		filteredComponents := []ComponentEntityV1alpha1{}
 		for _, component := range lc.Items {
 			if tagsMatch(argsArr, component.Metadata.Tags) {
 				filteredComponents = append(filteredComponents, component)

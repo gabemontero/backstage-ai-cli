@@ -123,7 +123,7 @@ func (k *BackstageRESTClientWrapper) processFetch(resp *resty.Response, url, act
 func (k *BackstageRESTClientWrapper) processDelete(resp *resty.Response, url, action string) (string, error) {
 	rc := resp.StatusCode()
 	getResp := resp.String()
-	if rc != 204 {
+	if rc != 204 && rc != 200 {
 		return "", fmt.Errorf("%s for %s rc %d body %s\n", action, url, rc, getResp)
 	} else {
 		klog.V(4).Infof("%s for %s returned ok\n", action, url)

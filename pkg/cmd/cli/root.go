@@ -82,7 +82,7 @@ $ bkstg-ai new-model <kserve|kubeflow|huggingface|oci|3scale> <owner> <lifecycle
 		Long: "fetch-model accesses the Backstage Catalog for Entities related to AI Models",
 		Example: `
 # Access the Backstage Catalog for Entities related to AI Models
-$ bkstg-ai fetch-model [with-any-tags|with-all-tags] [location|components|resources|apis|entities] [args...]
+$ bkstg-ai fetch-model <location|components|resources|apis|entities> [args...]
 `,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Help()
@@ -131,12 +131,12 @@ $ bkstg-ai import-model <url>
 # Access the Backstage Catalog for all entities, regardless if AI related
 $ bkstg-ai fetch-model entities
 `,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 
-			if len(args) == 0 {
-				processOutput(backstage.SetupBackstageRESTClient(cfg).ListEntities())
-				return
-			}
+			str, err := backstage.SetupBackstageRESTClient(cfg).ListEntities()
+			processOutput(str, err)
+			return err
+
 		},
 	})
 
@@ -147,8 +147,10 @@ $ bkstg-ai fetch-model entities
 # Access the Backstage Catalog for locations related to AI Models
 $ bkstg-ai fetch-model locations [args...]
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			processOutput(backstage.SetupBackstageRESTClient(cfg).GetLocation(args...))
+		RunE: func(cmd *cobra.Command, args []string) error {
+			str, err := backstage.SetupBackstageRESTClient(cfg).GetLocation(args...)
+			processOutput(str, err)
+			return err
 		},
 	})
 
@@ -159,8 +161,10 @@ $ bkstg-ai fetch-model locations [args...]
 # Retrieve the Backstage Catalog for resources related to AI Models
 $ bkstg-ai fetch-model components [args...]
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			processOutput(backstage.SetupBackstageRESTClient(cfg).GetComponent(args...))
+		RunE: func(cmd *cobra.Command, args []string) error {
+			str, err := backstage.SetupBackstageRESTClient(cfg).GetComponent(args...)
+			processOutput(str, err)
+			return err
 		},
 	})
 
@@ -171,8 +175,10 @@ $ bkstg-ai fetch-model components [args...]
 # Retrieve the Backstage Catalog for resources related to AI Models
 $ bkstg-ai fetch-model resources [args...]
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			processOutput(backstage.SetupBackstageRESTClient(cfg).GetResource(args...))
+		RunE: func(cmd *cobra.Command, args []string) error {
+			str, err := backstage.SetupBackstageRESTClient(cfg).GetResource(args...)
+			processOutput(str, err)
+			return err
 		},
 	})
 
@@ -183,8 +189,10 @@ $ bkstg-ai fetch-model resources [args...]
 # Retrieve the Backstage Catalog for APIs related to AI Models
 $ bkstg-ai fetch-model apis [args...]
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			processOutput(backstage.SetupBackstageRESTClient(cfg).GetAPI(args...))
+		RunE: func(cmd *cobra.Command, args []string) error {
+			str, err := backstage.SetupBackstageRESTClient(cfg).GetAPI(args...)
+			processOutput(str, err)
+			return err
 		},
 	})
 
@@ -197,11 +205,10 @@ $ bkstg-ai fetch-model apis [args...]
 }
 
 func processOutput(str string, err error) {
-	if err != nil {
-		klog.Errorf("%s\nERROR: %s\n", str, err.Error())
-		klog.Flush()
-		return
-	}
 	klog.Infoln(str)
 	klog.Flush()
+	if err != nil {
+		klog.Errorf("%s", err.Error())
+		klog.Flush()
+	}
 }

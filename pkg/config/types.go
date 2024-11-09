@@ -1,9 +1,15 @@
 package config
 
+import (
+	"github.com/go-resty/resty/v2"
+	servingv1beta1 "github.com/kserve/kserve/pkg/client/clientset/versioned/typed/serving/v1beta1"
+)
+
 type Config struct {
 	// K8S related
-	Kubeconfig string
-	Namespace  string
+	Kubeconfig    string
+	Namespace     string
+	ServingClient servingv1beta1.ServingV1beta1Interface
 
 	// Cross "store" related
 	StoreURL     string
@@ -14,6 +20,9 @@ type Config struct {
 	BackstageSkipTLS bool
 	BackstageToken   string
 	BackstageURL     string
+
+	// Kubeflow related
+	KubeflowRESTClient *resty.Client
 
 	// new-model related
 	DeleteAll              bool
