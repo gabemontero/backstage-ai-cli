@@ -110,13 +110,13 @@ func callKubeflowREST(id string, kfmr *KubeFlowRESTClientWrapper) (mvs []openapi
 	return
 }
 
-func callBackstagePrinters(owner, lifecycle string, rm *openapi.RegisteredModel, mv []openapi.ModelVersion, ma map[string][]openapi.ModelArtifact, cmd *cobra.Command) error {
+func callBackstagePrinters(owner, lifecycle string, rm *openapi.RegisteredModel, mvs []openapi.ModelVersion, mas map[string][]openapi.ModelArtifact, cmd *cobra.Command) error {
 	compPop := componentPopulator{}
 	compPop.owner = owner
 	compPop.lifecycle = lifecycle
 	compPop.registeredModel = rm
-	compPop.modelVersions = mv
-	compPop.modelArtifacts = ma
+	compPop.modelVersions = mvs
+	compPop.modelArtifacts = mas
 	err := backstage.PrintComponent(&compPop, cmd)
 	if err != nil {
 		return err
@@ -126,29 +126,34 @@ func callBackstagePrinters(owner, lifecycle string, rm *openapi.RegisteredModel,
 	resPop.owner = owner
 	resPop.lifecycle = lifecycle
 	resPop.registeredModel = rm
-	resPop.modelVersions = mv
-	resPop.modelArtifacts = ma
-	err = backstage.PrintResource(&resPop, cmd)
-	if err != nil {
-		return err
+	for _, mv := range mvs {
+		resPop.modelVersion = &mv
+		m, _ := mas[*mv.Id]
+		resPop.modelArtifacts = m
+		err = backstage.PrintResource(&resPop, cmd)
+		if err != nil {
+			return err
+		}
 	}
 
 	apiPop := apiPopulator{}
 	apiPop.owner = owner
 	apiPop.lifecycle = lifecycle
 	apiPop.registeredModel = rm
-	apiPop.modelVersions = mv
-	apiPop.modelArtifacts = ma
-	err = backstage.PrintAPI(&apiPop, cmd)
-	return err
+	for _, arr := range mas {
+		for _, ma := range arr {
+			apiPop.modelArtifact = &ma
+			err = backstage.PrintAPI(&apiPop, cmd)
+			return err
+		}
+	}
+	return nil
 }
 
 type commonPopulator struct {
 	owner           string
 	lifecycle       string
 	registeredModel *openapi.RegisteredModel
-	modelVersions   []openapi.ModelVersion
-	modelArtifacts  map[string][]openapi.ModelArtifact
 }
 
 func (pop *commonPopulator) GetOwner() string {
@@ -183,6 +188,8 @@ func (pop *commonPopulator) GetProvidedAPIs() []string {
 
 type componentPopulator struct {
 	commonPopulator
+	modelVersions  []openapi.ModelVersion
+	modelArtifacts map[string][]openapi.ModelArtifact
 }
 
 func (pop *componentPopulator) GetName() string {
@@ -222,10 +229,12 @@ func (pop *componentPopulator) GetTechdocRef() string {
 
 type resourcePopulator struct {
 	commonPopulator
+	modelVersion   *openapi.ModelVersion
+	modelArtifacts []openapi.ModelArtifact
 }
 
 func (pop *resourcePopulator) GetName() string {
-	return pop.modelVersions[0].Name
+	return pop.modelVersion.Name
 }
 
 func (pop *resourcePopulator) GetTechdocRef() string {
@@ -234,16 +243,14 @@ func (pop *resourcePopulator) GetTechdocRef() string {
 
 func (pop *resourcePopulator) GetLinks() []backstage.EntityLink {
 	links := []backstage.EntityLink{}
-	for _, value := range pop.modelArtifacts {
-		for _, ma := range value {
-			if ma.Uri != nil {
-				links = append(links, backstage.EntityLink{
-					URL:   *ma.Uri,
-					Title: ma.GetDescription(),
-					Icon:  backstage.LINK_ICON_WEBASSET,
-					Type:  backstage.LINK_TYPE_WEBSITE,
-				})
-			}
+	for _, ma := range pop.modelArtifacts {
+		if ma.Uri != nil {
+			links = append(links, backstage.EntityLink{
+				URL:   *ma.Uri,
+				Title: ma.GetDescription(),
+				Icon:  backstage.LINK_ICON_WEBASSET,
+				Type:  backstage.LINK_TYPE_WEBSITE,
+			})
 		}
 	}
 	return links
@@ -251,16 +258,13 @@ func (pop *resourcePopulator) GetLinks() []backstage.EntityLink {
 
 func (pop *resourcePopulator) GetTags() []string {
 	tags := []string{}
-	for _, mv := range pop.modelVersions {
-		for key := range mv.GetCustomProperties() {
-			tags = append(tags, key)
-		}
+	for key := range pop.modelVersion.GetCustomProperties() {
+		tags = append(tags, key)
 	}
-	for _, value := range pop.modelArtifacts {
-		for _, ma := range value {
-			for k := range ma.GetCustomProperties() {
-				tags = append(tags, k)
-			}
+
+	for _, ma := range pop.modelArtifacts {
+		for k := range ma.GetCustomProperties() {
+			tags = append(tags, k)
 		}
 	}
 	return tags
@@ -273,11 +277,11 @@ func (pop *resourcePopulator) GetDependencyOf() []string {
 // TODO Until we get the inferenceservice endpoint URL associated with the model registry related API won't have much for Backstage API here
 type apiPopulator struct {
 	commonPopulator
+	modelArtifact *openapi.ModelArtifact
 }
 
 func (pop *apiPopulator) GetName() string {
-	mas := pop.modelArtifacts[*pop.modelVersions[0].Id]
-	return *mas[0].Name
+	return *pop.modelArtifact.Name
 }
 
 func (pop *apiPopulator) GetDependencyOf() []string {
