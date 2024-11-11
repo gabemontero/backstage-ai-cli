@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"strings"
 )
 
 type listResources struct {
@@ -57,18 +56,7 @@ func (b *BackstageRESTClientWrapper) GetResource(args ...string) (string, error)
 	}
 
 	if b.Tags {
-		if b.Subset {
-			for _, arg := range args {
-				filterValue = filterValue + ",metadata.tags=" + arg
-			}
-			qparams.Set("filter", filterValue)
-		} else {
-			//TODO could not determine single query parameter format that resulted in returning
-			// a list of entities whose `metadata.tags` array directly matched a provided list of args;
-			// for now, we capture the arg list in the query params
-			qparams.Add("metadata.tags", strings.Join(args, " "))
-		}
-
+		qparams = updateQParams(b.Subset, filterValue, args, qparams)
 		return b.ListResources(qparams)
 	}
 

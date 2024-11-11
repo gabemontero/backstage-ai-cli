@@ -46,11 +46,20 @@ func (b *BackstageRESTClientWrapper) ListComponents(qparms *url.Values) (string,
 }
 
 func (b *BackstageRESTClientWrapper) GetComponent(args ...string) (string, error) {
-	if len(args) == 0 {
-		return b.ListComponents(&url.Values{
-			"filter": []string{"kind=component", "spec.type=model-server"},
-		})
+	// example 'filter' value from swagger doc:  'kind=component,metadata.annotations.backstage.io/orphan=true'
+	filterValue := "kind=component,spec.type=model-server"
+	qparams := &url.Values{
+		"filter": []string{filterValue},
 	}
+	if len(args) == 0 {
+		return b.ListComponents(qparams)
+	}
+
+	if b.Tags {
+		qparams = updateQParams(b.Subset, filterValue, args, qparams)
+		return b.ListComponents(qparams)
+	}
+
 	keys := buildKeys(args...)
 	buffer := &bytes.Buffer{}
 	for namespace, names := range keys {

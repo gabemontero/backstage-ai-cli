@@ -46,11 +46,20 @@ func (b *BackstageRESTClientWrapper) ListAPIs(qparms *url.Values) (string, error
 }
 
 func (b *BackstageRESTClientWrapper) GetAPI(args ...string) (string, error) {
-	if len(args) == 0 {
-		return b.ListAPIs(&url.Values{
-			"filter": []string{"kind=api", "spec.type=openapi"},
-		})
+	// example 'filter' value from swagger doc:  'kind=component,metadata.annotations.backstage.io/orphan=true'
+	filterValue := "kind=api,spec.type=openapi"
+	qparams := &url.Values{
+		"filter": []string{filterValue},
 	}
+	if len(args) == 0 {
+		return b.ListAPIs(qparams)
+	}
+
+	if b.Tags {
+		qparams = updateQParams(b.Subset, filterValue, args, qparams)
+		return b.ListAPIs(qparams)
+	}
+
 	keys := buildKeys(args...)
 	buffer := &bytes.Buffer{}
 	for namespace, names := range keys {
