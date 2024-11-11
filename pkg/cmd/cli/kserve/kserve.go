@@ -36,9 +36,6 @@ func (pop *commonPopulator) GetName() string {
 func (pop *commonPopulator) GetDescription() string {
 	return fmt.Sprintf("KServe instance %s:%s", pop.is.Namespace, pop.is.Name)
 }
-func (pop *commonPopulator) GetDisplayName() string {
-	return fmt.Sprintf("KServe instance %s:%s", pop.is.Namespace, pop.is.Name)
-}
 
 func (pop *commonPopulator) GetLinks() []backstage.EntityLink {
 	links := []backstage.EntityLink{}
@@ -89,38 +86,47 @@ func (pop *commonPopulator) GetLinks() []backstage.EntityLink {
 func (pop *commonPopulator) GetTags() []string {
 	tags := []string{}
 	predictor := pop.is.Spec.Predictor
-	tag := ""
 	// one and only one predictor spec can be set
 	switch {
 	case predictor.SKLearn != nil:
-		tag = "sklearn"
+		tags = append(tags, "sklearn")
+		fallthrough
 	case predictor.XGBoost != nil:
-		tag = "xgboost"
+		tags = append(tags, "xgboost")
+		fallthrough
 	case predictor.Tensorflow != nil:
-		tag = "tensorflow"
+		tags = append(tags, "tensorflow")
+		fallthrough
 	case predictor.PyTorch != nil:
-		tag = "pytorch"
+		tags = append(tags, "pytorch")
+		fallthrough
 	case predictor.Triton != nil:
-		tag = "triton"
+		tags = append(tags, "triton")
+		fallthrough
 	case predictor.ONNX != nil:
-		tag = "onnx"
+		tags = append(tags, "onnx")
+		fallthrough
 	case predictor.HuggingFace != nil:
-		tag = "huggingface"
+		tags = append(tags, "huggingface")
+		fallthrough
 	case predictor.PMML != nil:
-		tag = "pmml"
+		tags = append(tags, "pmml")
+		fallthrough
 	case predictor.LightGBM != nil:
-		tag = "lightgbm"
+		tags = append(tags, "lightgbm")
+		fallthrough
 	case predictor.Paddle != nil:
-		tag = "paddle"
+		tags = append(tags, "paddle")
+		fallthrough
 	case predictor.Model != nil:
 		modelFormat := predictor.Model.ModelFormat
-		tag = modelFormat.Name
+		tag := modelFormat.Name
 		if modelFormat.Version != nil {
 			tag = tag + "-" + *modelFormat.Version
 		}
 		tag = strings.ToLower(tag)
+		tags = append(tags, tag)
 	}
-	tags = append(tags, tag)
 	explainer := pop.is.Spec.Explainer
 	if explainer != nil && explainer.ART != nil {
 		tags = append(tags, strings.ToLower(string(explainer.ART.Type)))

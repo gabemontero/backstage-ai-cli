@@ -14,9 +14,10 @@ import (
 const (
 	MethodGet = "GET"
 
-	TestJSONStringRegisteredModelOneLine = `{"items":[{"createTimeSinceEpoch":"1731103949567","customProperties":{"foo":{"metadataType":"MetadataStringValue","string_value":"bar"}},"description":"dummy model 1","id":"1","lastUpdateTimeSinceEpoch":"1731103975700","name":"model-1","owner":"kube:admin","state":"LIVE"}],"nextPageToken":"","pageSize":0,"size":1}`
-	TestJSONStringModelVersionOneLine    = `{"items":[{"author":"kube:admin","createTimeSinceEpoch":"1731103949724","customProperties":{},"description":"version 1","id":"2","lastUpdateTimeSinceEpoch":"1731103949724","name":"v1","registeredModelId":"1","state":"LIVE"}],"nextPageToken":"","pageSize":0,"size":1}`
-	TestJSONStringModelArtifactOneLine   = `{"items":[{"artifactType":"model-artifact","createTimeSinceEpoch":"1731103949909","customProperties":{},"description":"version 1","id":"1","lastUpdateTimeSinceEpoch":"1731103949909","modelFormatName":"tensorflow","modelFormatVersion":"v1","name":"model-1-v1-artifact","state":"LIVE","uri":"https://foo.com"}],"nextPageToken":"","pageSize":0,"size":1}`
+	TestJSONStringRegisteredModelOneLine    = `{"items":[{"createTimeSinceEpoch":"1731103949567","customProperties":{"foo":{"metadataType":"MetadataStringValue","string_value":"bar"}},"description":"dummy model 1","id":"1","lastUpdateTimeSinceEpoch":"1731103975700","name":"model-1","owner":"kube:admin","state":"LIVE"}],"nextPageToken":"","pageSize":0,"size":1}`
+	TestJSONStringRegisteredModelOneLineGet = `{"createTimeSinceEpoch":"1731103949567","customProperties":{"foo":{"metadataType":"MetadataStringValue","string_value":"bar"}},"description":"dummy model 1","id":"1","lastUpdateTimeSinceEpoch":"1731103975700","name":"model-1","owner":"kube:admin","state":"LIVE"}`
+	TestJSONStringModelVersionOneLine       = `{"items":[{"author":"kube:admin","createTimeSinceEpoch":"1731103949724","customProperties":{},"description":"version 1","id":"2","lastUpdateTimeSinceEpoch":"1731103949724","name":"v1","registeredModelId":"1","state":"LIVE"}],"nextPageToken":"","pageSize":0,"size":1}`
+	TestJSONStringModelArtifactOneLine      = `{"items":[{"artifactType":"model-artifact","createTimeSinceEpoch":"1731103949909","customProperties":{},"description":"version 1","id":"1","lastUpdateTimeSinceEpoch":"1731103949909","modelFormatName":"tensorflow","modelFormatVersion":"v1","name":"model-1-v1-artifact","state":"LIVE","uri":"https://foo.com"}],"nextPageToken":"","pageSize":0,"size":1}`
 )
 
 var (
@@ -43,8 +44,9 @@ func CreateGetServer(t *testing.T) *httptest.Server {
 				_, _ = w.Write([]byte(TestJSONStringModelVersionOneLine))
 			case strings.HasSuffix(r.URL.Path, "/artifacts"):
 				_, _ = w.Write([]byte(TestJSONStringModelArtifactOneLine))
+			case strings.Contains(r.URL.Path, LIST_REG_MODEL_URI):
+				_, _ = w.Write([]byte(TestJSONStringRegisteredModelOneLineGet))
 			}
-
 		}
 	})
 

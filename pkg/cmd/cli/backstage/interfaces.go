@@ -13,7 +13,6 @@ type CommonPopulator interface {
 	GetDescription() string
 	GetLinks() []EntityLink
 	GetTags() []string
-	GetDisplayName() string
 	GetProvidedAPIs() []string
 	GetTechdocRef() string
 }
@@ -48,7 +47,6 @@ func PrintComponent(pop ComponentPopulator, cmd *cobra.Command) error {
 		Owner:        "user:" + pop.GetOwner(),
 		ProvidesApis: pop.GetProvidedAPIs(),
 		DependsOn:    pop.GetDependsOn(),
-		//TODO this version of the converted to Golang does not have `profile` with `displayName`
 	}
 	err := util.PrintYaml(component, true, cmd)
 	if err != nil {

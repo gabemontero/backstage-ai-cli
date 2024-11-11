@@ -37,6 +37,10 @@ func TestNewCmd(t *testing.T) {
 			args:   []string{"owner", "lifecycle"},
 			outStr: []string{listOutput},
 		},
+		{
+			args:   []string{"owner", "lifecycle", "1"},
+			outStr: []string{listOutput},
+		},
 	} {
 		cfg := &config.Config{}
 		SetupKubeflowTestRESTClient(ts, cfg)

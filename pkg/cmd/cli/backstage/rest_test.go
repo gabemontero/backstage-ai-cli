@@ -74,6 +74,8 @@ func CreateServer(t *testing.T) *httptest.Server {
 					_, _ = w.Write([]byte(apisJson))
 				case strings.Contains(filter, "component"):
 					_, _ = w.Write([]byte(componentsJson))
+				case strings.Contains(filter, "resource"):
+					_, _ = w.Write([]byte(resourcesJson))
 				default:
 					_, _ = w.Write([]byte(fmt.Sprintf(TestJSONStringOneLinePlusQueryParam, r.URL.Query().Encode())))
 				}

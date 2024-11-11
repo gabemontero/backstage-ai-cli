@@ -17,6 +17,7 @@ func setupConfig(cfg *config.Config, objs []serverapiv1beta1.InferenceService) {
 	cfg.ServingClient = fakeservingv1beta1.NewSimpleClientset().ServingV1beta1()
 	for _, obj := range objs {
 		cfg.ServingClient.InferenceServices(obj.Namespace).Create(context.TODO(), &obj, metav1.CreateOptions{})
+		cfg.Namespace = obj.Namespace
 	}
 }
 
@@ -55,6 +56,18 @@ func TestNewCmd(t *testing.T) {
 						Namespace: metav1.NamespaceDefault,
 						Name:      "is-1",
 					},
+				},
+			},
+			outStr: []string{urlNotSet},
+		},
+		{
+			args: []string{"owner", "lifecycle"},
+			is: []serverapiv1beta1.InferenceService{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: metav1.NamespaceDefault,
+						Name:      "is-1",
+					},
 					Status: serverapiv1beta1.InferenceServiceStatus{
 						URL: &apis.URL{
 							Scheme: "https",
@@ -67,6 +80,107 @@ func TestNewCmd(t *testing.T) {
 		},
 		{
 			args: []string{"owner", "lifecycle"},
+			is: []serverapiv1beta1.InferenceService{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: metav1.NamespaceDefault,
+						Name:      "is-1",
+					},
+					Status: serverapiv1beta1.InferenceServiceStatus{
+						URL: &apis.URL{
+							Scheme: "https",
+							Host:   "kserve.com",
+						},
+					},
+				},
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: metav1.NamespaceDefault,
+						Name:      "is-2",
+					},
+					Spec: serverapiv1beta1.InferenceServiceSpec{
+						Predictor: serverapiv1beta1.PredictorSpec{
+							SKLearn:     &serverapiv1beta1.SKLearnSpec{},
+							XGBoost:     &serverapiv1beta1.XGBoostSpec{},
+							Tensorflow:  &serverapiv1beta1.TFServingSpec{},
+							PyTorch:     &serverapiv1beta1.TorchServeSpec{},
+							Triton:      &serverapiv1beta1.TritonSpec{},
+							ONNX:        &serverapiv1beta1.ONNXRuntimeSpec{},
+							HuggingFace: &serverapiv1beta1.HuggingFaceRuntimeSpec{},
+							PMML:        &serverapiv1beta1.PMMLSpec{},
+							LightGBM:    &serverapiv1beta1.LightGBMSpec{},
+							Paddle:      &serverapiv1beta1.PaddleServerSpec{},
+							Model:       &serverapiv1beta1.ModelSpec{ModelFormat: serverapiv1beta1.ModelFormat{Name: "f1", Version: &version}},
+						},
+						Explainer: &serverapiv1beta1.ExplainerSpec{
+							ART: &serverapiv1beta1.ARTExplainerSpec{Type: serverapiv1beta1.ARTSquareAttackExplainer},
+						},
+					},
+					Status: serverapiv1beta1.InferenceServiceStatus{
+						URL: &apis.URL{
+							Scheme: "https",
+							Host:   "kserve.com",
+						},
+						Components: map[serverapiv1beta1.ComponentType]serverapiv1beta1.ComponentStatusSpec{
+							serverapiv1beta1.PredictorComponent: {
+								URL: &apis.URL{
+									Scheme: "https",
+									Host:   "kserve.com",
+									Path:   "docs",
+								},
+								RestURL: &apis.URL{
+									Scheme: "https",
+									Host:   "kserve.com",
+									Path:   "rest",
+								},
+								GrpcURL: &apis.URL{
+									Scheme: "https",
+									Host:   "kserve.com",
+									Path:   "grpc",
+								},
+							},
+							serverapiv1beta1.ExplainerComponent: {
+								URL: &apis.URL{
+									Scheme: "https",
+									Host:   "kserve.com",
+									Path:   "docs",
+								},
+								RestURL: &apis.URL{
+									Scheme: "https",
+									Host:   "kserve.com",
+									Path:   "rest",
+								},
+								GrpcURL: &apis.URL{
+									Scheme: "https",
+									Host:   "kserve.com",
+									Path:   "grpc",
+								},
+							},
+							serverapiv1beta1.TransformerComponent: {
+								URL: &apis.URL{
+									Scheme: "https",
+									Host:   "kserve.com",
+									Path:   "docs",
+								},
+								RestURL: &apis.URL{
+									Scheme: "https",
+									Host:   "kserve.com",
+									Path:   "rest",
+								},
+								GrpcURL: &apis.URL{
+									Scheme: "https",
+									Host:   "kserve.com",
+									Path:   "grpc",
+								},
+							},
+						},
+					},
+				},
+			},
+			outStr: []string{urlSet, description2, link21, link22, link23, link24, link25, link26, link27, link28, link29, link30, link31, link32, link33, nameTags2, compSpec2, resourceSpec2, apiSpec2},
+		},
+		{
+			args: []string{"owner", "lifecycle", "is-1", "is-2"},
 			is: []serverapiv1beta1.InferenceService{
 				{
 					ObjectMeta: metav1.ObjectMeta{
@@ -203,6 +317,54 @@ var (
 )
 
 const (
+	urlNotSet = `apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    backstage.io/techdocs-ref: ./
+  description: KServe instance default:is-1
+  name: default_is-1
+spec:
+  dependsOn:
+  - resource:default_is-1
+  - api:default_is-1
+  lifecycle: lifecycle
+  owner: user:owner
+  providesApis:
+  - default_is-1
+  type: model-server
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  annotations:
+    backstage.io/techdocs-ref: resource/
+  description: KServe instance default:is-1
+  name: default_is-1
+spec:
+  dependencyOf:
+  - component:default_is-1
+  lifecycle: lifecycle
+  owner: user:owner
+  providesApis:
+  - default_is-1
+  type: api-model
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  annotations:
+    backstage.io/techdocs-ref: api/
+  description: KServe instance default:is-1
+  name: default_is-1
+spec:
+  definition: ""
+  dependencyOf:
+  - component:default_is-1
+  lifecycle: lifecycle
+  owner: user:owner
+  type: openapi
+`
 	urlSet = `apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
@@ -215,8 +377,6 @@ metadata:
     type: website
     url: https://kserve.com
   name: default_is-1
-  tags:
-  - ""
 spec:
   dependsOn:
   - resource:default_is-1
@@ -239,8 +399,6 @@ metadata:
     type: website
     url: https://kserve.com
   name: default_is-1
-  tags:
-  - ""
 spec:
   dependencyOf:
   - component:default_is-1
@@ -262,8 +420,6 @@ metadata:
     type: website
     url: https://kserve.com
   name: default_is-1
-  tags:
-  - ""
 spec:
   definition: ""
   dependencyOf:
@@ -342,6 +498,16 @@ spec:
 	nameTags2 = `  name: default_is-2
   tags:
   - sklearn
+  - xgboost
+  - tensorflow
+  - pytorch
+  - triton
+  - onnx
+  - huggingface
+  - pmml
+  - lightgbm
+  - paddle
+  - f1-v1.0
   - squareattack
 `
 	compSpec2 = `spec:

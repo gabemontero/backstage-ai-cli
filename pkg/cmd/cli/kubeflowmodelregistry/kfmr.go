@@ -174,13 +174,6 @@ func (pop *commonPopulator) GetDescription() string {
 	return ""
 }
 
-func (pop *commonPopulator) GetDisplayName() string {
-	if pop.registeredModel.ExternalId != nil {
-		return *pop.registeredModel.ExternalId
-	}
-	return fmt.Sprintf("%s model from KubeFlow Model Registry", pop.registeredModel.Name)
-}
-
 // TODO won't have API until KubeFlow Model Registry gets us inferenceservice endpoints
 func (pop *commonPopulator) GetProvidedAPIs() []string {
 	return []string{}
