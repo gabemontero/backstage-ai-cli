@@ -71,11 +71,19 @@ func CreateServer(t *testing.T) *httptest.Server {
 				filter := values.Get("filter")
 				switch {
 				case strings.Contains(filter, "api"):
-					_, _ = w.Write([]byte(apisJson))
+					if strings.Contains(filter, "metadata") {
+						_, _ = w.Write([]byte(apisJsonFromTags))
+					} else {
+						_, _ = w.Write([]byte(apisJson))
+					}
 				case strings.Contains(filter, "component"):
 					_, _ = w.Write([]byte(componentsJson))
 				case strings.Contains(filter, "resource"):
-					_, _ = w.Write([]byte(resourcesJson))
+					if strings.Contains(filter, "metadata") {
+						_, _ = w.Write([]byte(resourcesFromTagsJson))
+					} else {
+						_, _ = w.Write([]byte(resourcesJson))
+					}
 				default:
 					_, _ = w.Write([]byte(fmt.Sprintf(TestJSONStringOneLinePlusQueryParam, r.URL.Query().Encode())))
 				}
