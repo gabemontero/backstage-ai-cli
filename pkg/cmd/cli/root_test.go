@@ -52,8 +52,9 @@ func TestNewCmd(t *testing.T) {
 			generatesHelp: true,
 		},
 		{
-			args:          []string{"fetch-model", "location", "help"},
-			generatesHelp: true,
+			args:           []string{"fetch-model", "location", "help"},
+			generatesError: true,
+			errorStr:       "unsupported protocol scheme",
 		},
 		{
 			args:          []string{"fetch-model", "help"},

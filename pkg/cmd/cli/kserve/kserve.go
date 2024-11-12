@@ -214,6 +214,22 @@ func NewCmd(cfg *config.Config) *cobra.Command {
 		Use:   "kserve",
 		Short: "KServe related API",
 		Long:  "Interact with KServe related instances on a K8s cluster to manage AI related catalog entities in a Backstage instance.",
+		Example: `
+# Both owner and lifecycle are required parameters.  Examine Backstage Catalog documentation for details.
+# This will query all the InferenceService instances in the current namespace and build Catalog Component, Resource, and
+# API Entities from the data.
+$ bkstg-ai new-model kserve <owner> <lifecycle> <args...>
+
+# This will set the URL, Token, and Skip TLS when accessing the cluster for InferenceService instances 
+$ bkstg-ai new-model kserve <owner> <lifecycle> --model-metadata-url=https://my-kubeflow.com --model-metadata-token=my-token --model-metadata-skip-tls=true
+
+# This will set the Kubeconfig file to use when accessing the cluster for InferenceService instances
+$ bkstg-ai new-model kserve <owner> <lifecycle> --kubeconfig=/home/myid/my-kube.json
+
+# This form will pull in only the InferenceService instances with the names 'inferenceservice1' and 'inferenceservice2'
+# in the 'my-datascience-project'namespace in order to build Catalog Component, Resource, and API Entities.
+$ bkstg-ai new-model kserve owner lifecycle inferenceservice1 inferenceservice2 --namespace my-datascience-project
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ids := []string{}
 

@@ -15,6 +15,19 @@ func NewCmd(cfg *config.Config) *cobra.Command {
 		Aliases: []string{"kf"},
 		Short:   "Kubeflow Model Registry related API",
 		Long:    "Interact with the Kubeflow Model Registry REST API as part of managing AI related catalog entities in a Backstage instance.",
+		Example: `
+# Both owner and lifecycle are required parameters.  Examine Backstage Catalog documentation for details.
+# This will query all the RegisteredModel, ModelVersion, and ModelArtifact instances in the Kubeflow Model Registry and build Catalog Component, Resource, and
+# API Entities from the data.
+$ bkstg-ai new-model kubeflow <owner> <lifecycle> <args...>
+
+# This will set the URL, Token, and Skip TLS when accessing Kubeflow
+$ bkstg-ai new-model kubeflow <owner> <lifecycle> --model-metadata-url=https://my-kubeflow.com --model-metadata-token=my-token --model-metadata-skip-tls=true
+
+# This form will pull in only the RegisteredModels with the specified IDs '1' and '2' and their ModelVersion and ModelArtifact
+# children in order to build Catalog Component, Resource, and API Entities.
+$ bkstg-ai new-model kubeflow <owner> <lifecycle> 1 2 
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ids := []string{}
 
