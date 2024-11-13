@@ -73,3 +73,7 @@ a start, but TechDocs typically provide this plus additional information.
 
 But HuggingFace with its ModelCards is really the only game in town wrt the Model Registries and something that approaches
 Tech Docs.  And even there, it is one markdown file, where as TechDoc typically is broken up into multiple markdown files.
+
+And the internal 3Scale based "Models as a Service" has some additional examples in various languages and frameworks.
+
+With that inventory, it is still TBD on what value add the CLI can provide with respect to Backstage TechDocs.
