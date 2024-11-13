@@ -13,6 +13,8 @@ GO_TEST_FLAGS ?= -race -cover
 GO_PATH ?= $(shell go env GOPATH)
 GO_CACHE ?= $(shell go env GOCACHE)
 
+INSTALL_LOCATION ?= /usr/local/bin
+
 ARGS ?=
 
 .EXPORT_ALL_VARIABLES:
@@ -24,7 +26,7 @@ $(BIN):
 build: $(BIN)
 
 install: build
-	install -m 0755 $(BIN) /usr/local/bin/
+	install -m 0755 $(BIN) $(INSTALL_LOCATION)
 
 # creates a kubectl prefixed binary, "kubectl-$APP", and when installed under $PATH, will be
 # visible as "kubectl $APP".
@@ -39,9 +41,6 @@ kubectl-install: kubectl install
 
 clean:
 	rm -rf "$(OUTPUT_DIR)"
-
-run:
-	go run $(GO_FLAGS) $(CMD) $(ARGS)
 
 # runs all tests
 test: test-unit
