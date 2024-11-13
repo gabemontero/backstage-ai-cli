@@ -23,7 +23,7 @@ func NewCmd() *cobra.Command {
 $ bkstg-ai new-model <kserve|kubeflow> <owner> <lifecycle> <args...>
 
 # Access the Backstage Catalog for Entities related to AI Models
-$ bkstg-ai fetch-model [location|components|resources|apis] [args...]
+$ bkstg-ai get [location|components|resources|apis] [args...]
 
 # Import from an accessible URL Backstage Catalog entities
 $ bkstg-ai import-model <url>
@@ -78,12 +78,12 @@ $ bkstg-ai delete-model <location id>
 	newModel.AddCommand(kubeflowmodelregistry.NewCmd(cfg))
 
 	queryModel := &cobra.Command{
-		Use:     "fetch-model",
-		Long:    "fetch-model accesses the Backstage Catalog for Entities related to AI Models",
-		Aliases: []string{"get", "g", "fm", "fetch-models"},
+		Use:     "get",
+		Long:    "get accesses the Backstage Catalog for Entities related to AI Models",
+		Aliases: []string{"g"},
 		Example: `
 # Access the Backstage Catalog for Entities related to AI Models
-$ bkstg-ai fetch-model <locations|components|resources|apis|entities> [args...]
+$ bkstg-ai get <locations|components|resources|apis|entities> [args...]
 `,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Help()
@@ -141,10 +141,10 @@ $ bkstg-ai import-model <url> --backstage-url=https://my-rhdh.com --backstage-to
 		Aliases: []string{"e", "entity"},
 		Example: `
 # Access the Backstage Catalog for all entities, regardless if AI related
-$ bkstg-ai fetch-model entities
+$ bkstg-ai get entities
 
 # Set the URL for the Backstage, the authentication token, and Skip-TLS settings
-$ bkstg-ai fetch-model entities --backstage-url=https://my-rhdh.com --backstage-token=my-token --backstage-skip-tls=true
+$ bkstg-ai get entities --backstage-url=https://my-rhdh.com --backstage-token=my-token --backstage-skip-tls=true
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -161,15 +161,15 @@ $ bkstg-ai fetch-model entities --backstage-url=https://my-rhdh.com --backstage-
 		Aliases: []string{"l", "location"},
 		Example: `
 # Access the Backstage Catalog for locations, regardless if AI related
-$ bkstg-ai fetch-model locations [args...]
+$ bkstg-ai get locations [args...]
 
 # Access the Backstage Catatlog for a specific location using the dynamically generated 
 # hash ID from when the location was imported.  There is not support in Backstage currently for specifying
 # the URL used to import the model as a query parameter.
-$ bkstg-ai fetch-model locations my-big-long-id-for-location
+$ bkstg-ai get locations my-big-long-id-for-location
 
 # Set the URL for the Backstage, the authentication token, and Skip-TLS settings
-$ bkstg-ai fetch-model locations --backstage-url=https://my-rhdh.com --backstage-token=my-token --backstage-skip-tls=true
+$ bkstg-ai get locations --backstage-url=https://my-rhdh.com --backstage-token=my-token --backstage-skip-tls=true
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			str, err := backstage.SetupBackstageRESTClient(cfg).GetLocation(args...)
@@ -185,19 +185,19 @@ $ bkstg-ai fetch-model locations --backstage-url=https://my-rhdh.com --backstage
 		Example: `
 # Retrieve the Backstage Catalog for resources related to AI Models, where being AI related is determined by the 
 # 'type' being set to 'model-server'
-$ bkstg-ai fetch-model components [args...]
+$ bkstg-ai get components [args...]
 
 # Set the URL for the Backstage, the authentication token, and Skip-TLS settings
-$ bkstg-ai fetch-model components --backstage-url=https://my-rhdh.com --backstage-token=my-token --backstage-skip-tls=true
+$ bkstg-ai get components --backstage-url=https://my-rhdh.com --backstage-token=my-token --backstage-skip-tls=true
 
 # Retrieve a specific set of AI related Components by namespace:name
-$ bkstg-ai fetch-model components default:my-component default:your-component
+$ bkstg-ai get components default:my-component default:your-component
 
 # Retrieve a set of AI Components where the provided list of tags match (order of tags disregarded)
-$ bkstg-ai fetch-model components genai vllm --use-params-as-tags=true
+$ bkstg-ai get components genai vllm --use-params-as-tags=true
 
 # Retrieve a set of Components which have any of the provided list of tags
-$ bkstg-ai fetch-model components gen-ai --use-params-as-tags=true --use-any-subset=true
+$ bkstg-ai get components gen-ai --use-params-as-tags=true --use-any-subset=true
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			str, err := backstage.SetupBackstageRESTClient(cfg).GetComponent(args...)
@@ -213,19 +213,19 @@ $ bkstg-ai fetch-model components gen-ai --use-params-as-tags=true --use-any-sub
 		Example: `
 # Retrieve the Backstage Catalog for resources related to AI Models, where being AI related is determined by the 
 # 'type' being set to 'ai-model'
-$ bkstg-ai fetch-model resources [args...]
+$ bkstg-ai get resources [args...]
 
 # Set the URL for the Backstage, the authentication token, and Skip-TLS settings
-$ bkstg-ai fetch-model resources --backstage-url=https://my-rhdh.com --backstage-token=my-token --backstage-skip-tls=true
+$ bkstg-ai get resources --backstage-url=https://my-rhdh.com --backstage-token=my-token --backstage-skip-tls=true
 
 # Retrieve a specific set of AI related Resources by namespace:name
-$ bkstg-ai fetch-model resources default:my-component default:your-component
+$ bkstg-ai get resources default:my-component default:your-component
 
 # Retrieve a set of AI Resources where the provided list of tags match (order of tags disregarded)
-$ bkstg-ai fetch-model resources genai vllm --use-params-as-tags=true
+$ bkstg-ai get resources genai vllm --use-params-as-tags=true
 
 # Retrieve a set of AI Resources which have any of the provided list of tags
-$ bkstg-ai fetch-model resources gen-ai --use-params-as-tags=true --use-any-subset=true
+$ bkstg-ai get resources gen-ai --use-params-as-tags=true --use-any-subset=true
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			str, err := backstage.SetupBackstageRESTClient(cfg).GetResource(args...)
@@ -241,19 +241,19 @@ $ bkstg-ai fetch-model resources gen-ai --use-params-as-tags=true --use-any-subs
 		Example: `
 # Retrieve the Backstage Catalog for APIs related to AI Models, where being AI related is determined by the 
 # 'type' being set to 'model-service-api'
-$ bkstg-ai fetch-model apis [args...]
+$ bkstg-ai get apis [args...]
 
 # Set the URL for the Backstage, the authentication token, and Skip-TLS settings
-$ bkstg-ai fetch-model locations --backstage-url=https://my-rhdh.com --backstage-token=my-token --backstage-skip-tls=true
+$ bkstg-ai get locations --backstage-url=https://my-rhdh.com --backstage-token=my-token --backstage-skip-tls=true
 
 # Retrieve a specific set of AI related APIs by namespace:name
-$ bkstg-ai fetch-model apis default:my-component default:your-component
+$ bkstg-ai get apis default:my-component default:your-component
 
 # Retrieve a set of AI APIs where the provided list of tags match (order of tags disregarded)
-$ bkstg-ai fetch-model apis genai vllm --use-params-as-tags=true
+$ bkstg-ai get apis genai vllm --use-params-as-tags=true
 
 # Retrieve a set of AI APIs which have any of the provided list of tags
-$ bkstg-ai fetch-model apis gen-ai --use-params-as-tags=true --use-any-subset=true
+$ bkstg-ai get apis gen-ai --use-params-as-tags=true --use-any-subset=true
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			str, err := backstage.SetupBackstageRESTClient(cfg).GetAPI(args...)

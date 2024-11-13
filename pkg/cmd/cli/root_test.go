@@ -40,64 +40,64 @@ func TestNewCmd(t *testing.T) {
 			generatesHelp: true,
 		},
 		{
-			args:          []string{"fetch-model"},
+			args:          []string{"get"},
 			generatesHelp: true,
 		},
 		{
-			args:          []string{"fetch-model", "help"},
+			args:          []string{"get", "help"},
 			generatesHelp: true,
 		},
 		{
-			args:          []string{"fetch-model", "help", "location"},
+			args:          []string{"get", "help", "location"},
 			generatesHelp: true,
 		},
 		{
-			args:           []string{"fetch-model", "location", "help"},
+			args:           []string{"get", "location", "help"},
 			generatesError: true,
 			errorStr:       "unsupported protocol scheme",
 		},
 		{
-			args:          []string{"fetch-model", "help"},
+			args:          []string{"get", "help"},
 			generatesHelp: true,
 		},
 		{
-			args:          []string{"fetch-model", "help", "locations"},
+			args:          []string{"get", "help", "locations"},
 			generatesHelp: true,
 		},
 		{
-			args:           []string{"fetch-model", "locations", "foo"},
+			args:           []string{"get", "locations", "foo"},
 			generatesError: true,
 			errorStr:       "unsupported protocol scheme",
 		},
 		{
-			args:          []string{"fetch-model", "help", "components"},
+			args:          []string{"get", "help", "components"},
 			generatesHelp: true,
 		},
 		{
-			args:           []string{"fetch-model", "components", "foo"},
+			args:           []string{"get", "components", "foo"},
 			generatesError: true,
 			errorStr:       "unsupported protocol scheme",
 		},
 		{
-			args:          []string{"fetch-model", "help", "resources"},
+			args:          []string{"get", "help", "resources"},
 			generatesHelp: true,
 		},
 		{
-			args:           []string{"fetch-model", "resources", "help"},
+			args:           []string{"get", "resources", "help"},
 			generatesError: true,
 			errorStr:       "unsupported protocol scheme",
 		},
 		{
-			args:          []string{"fetch-model", "help", "apis"},
+			args:          []string{"get", "help", "apis"},
 			generatesHelp: true,
 		},
 		{
-			args:           []string{"fetch-model", "apis", "foo"},
+			args:           []string{"get", "apis", "foo"},
 			generatesError: true,
 			errorStr:       "unsupported protocol scheme",
 		},
 		{
-			args:          []string{"fetch-model", "help", "entities"},
+			args:          []string{"get", "help", "entities"},
 			generatesHelp: true,
 		},
 	} {
