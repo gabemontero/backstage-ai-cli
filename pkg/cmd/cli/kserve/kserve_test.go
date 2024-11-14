@@ -330,6 +330,8 @@ spec:
   - api:default_is-1
   lifecycle: lifecycle
   owner: user:owner
+  profile:
+    displayName: The default_is-1 model server
   providesApis:
   - default_is-1
   type: model-server
@@ -346,6 +348,8 @@ spec:
   - component:default_is-1
   lifecycle: lifecycle
   owner: user:owner
+  profile:
+    displayName: The default_is-1 ai model
   providesApis:
   - default_is-1
   type: api-model
@@ -363,6 +367,8 @@ spec:
   - component:default_is-1
   lifecycle: lifecycle
   owner: user:owner
+  profile:
+    displayName: The default_is-1 openapi
   type: openapi
 `
 	urlSet = `apiVersion: backstage.io/v1alpha1
@@ -383,6 +389,8 @@ spec:
   - api:default_is-1
   lifecycle: lifecycle
   owner: user:owner
+  profile:
+    displayName: The default_is-1 model server
   providesApis:
   - default_is-1
   type: model-server
@@ -404,6 +412,8 @@ spec:
   - component:default_is-1
   lifecycle: lifecycle
   owner: user:owner
+  profile:
+    displayName: The default_is-1 ai model
   providesApis:
   - default_is-1
   type: api-model
@@ -426,6 +436,8 @@ spec:
   - component:default_is-1
   lifecycle: lifecycle
   owner: user:owner
+  profile:
+    displayName: The default_is-1 openapi
   type: openapi
 `
 
@@ -516,6 +528,8 @@ spec:
   - api:default_is-2
   lifecycle: lifecycle
   owner: user:owner
+  profile:
+    displayName: The default_is-2 model server
   providesApis:
   - default_is-2
   type: model-server
@@ -525,6 +539,8 @@ spec:
   - component:default_is-2
   lifecycle: lifecycle
   owner: user:owner
+  profile:
+    displayName: The default_is-2 ai model
   providesApis:
   - default_is-2
   type: api-model
@@ -535,6 +551,8 @@ spec:
   - component:default_is-2
   lifecycle: lifecycle
   owner: user:owner
+  profile:
+    displayName: The default_is-2 openapi
   type: openapi
 `
 )

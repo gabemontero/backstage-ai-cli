@@ -16,6 +16,35 @@ import (
 	"strings"
 )
 
+const (
+	kserveExamples = `
+# Both owner and lifecycle are required parameters.  Examine Backstage Catalog documentation for details.
+# This will query all the InferenceService instances in the current namespace and build Catalog Component, Resource, and
+# API Entities from the data.
+$ %s new-model kserve <owner> <lifecycle> <args...>
+
+# This will set the URL, Token, and Skip TLS when accessing the cluster for InferenceService instances 
+$ %s new-model kserve <owner> <lifecycle> --model-metadata-url=https://my-kubeflow.com --model-metadata-token=my-token --model-metadata-skip-tls=true
+
+# This will set the Kubeconfig file to use when accessing the cluster for InferenceService instances
+$ %s new-model kserve <owner> <lifecycle> --kubeconfig=/home/myid/my-kube.json
+
+# This form will pull in only the InferenceService instances with the names 'inferenceservice1' and 'inferenceservice2'
+# in the 'my-datascience-project'namespace in order to build Catalog Component, Resource, and API Entities.
+$ %s new-model kserve owner lifecycle inferenceservice1 inferenceservice2 --namespace my-datascience-project
+`
+	sklearn     = "sklearn"
+	xgboost     = "xgboost"
+	tensorflow  = "tensorflow"
+	pytorch     = "pytorch"
+	triton      = "triton"
+	onnx        = "onnx"
+	huggingface = "huggingface"
+	pmml        = "pmml"
+	lightgbm    = "lightgbm"
+	paddle      = "paddle"
+)
+
 type commonPopulator struct {
 	owner     string
 	lifecycle string
@@ -89,34 +118,34 @@ func (pop *commonPopulator) GetTags() []string {
 	// one and only one predictor spec can be set
 	switch {
 	case predictor.SKLearn != nil:
-		tags = append(tags, "sklearn")
+		tags = append(tags, sklearn)
 		fallthrough
 	case predictor.XGBoost != nil:
-		tags = append(tags, "xgboost")
+		tags = append(tags, xgboost)
 		fallthrough
 	case predictor.Tensorflow != nil:
-		tags = append(tags, "tensorflow")
+		tags = append(tags, tensorflow)
 		fallthrough
 	case predictor.PyTorch != nil:
-		tags = append(tags, "pytorch")
+		tags = append(tags, pytorch)
 		fallthrough
 	case predictor.Triton != nil:
-		tags = append(tags, "triton")
+		tags = append(tags, triton)
 		fallthrough
 	case predictor.ONNX != nil:
-		tags = append(tags, "onnx")
+		tags = append(tags, onnx)
 		fallthrough
 	case predictor.HuggingFace != nil:
-		tags = append(tags, "huggingface")
+		tags = append(tags, huggingface)
 		fallthrough
 	case predictor.PMML != nil:
-		tags = append(tags, "pmml")
+		tags = append(tags, pmml)
 		fallthrough
 	case predictor.LightGBM != nil:
-		tags = append(tags, "lightgbm")
+		tags = append(tags, lightgbm)
 		fallthrough
 	case predictor.Paddle != nil:
-		tags = append(tags, "paddle")
+		tags = append(tags, paddle)
 		fallthrough
 	case predictor.Model != nil:
 		modelFormat := predictor.Model.ModelFormat
@@ -150,6 +179,10 @@ func (pop *componentPopulator) GetTechdocRef() string {
 	return "./"
 }
 
+func (pop *componentPopulator) GetDisplayName() string {
+	return fmt.Sprintf("The %s model server", pop.GetName())
+}
+
 type resourcePopulator struct {
 	commonPopulator
 }
@@ -160,6 +193,10 @@ func (pop *resourcePopulator) GetDependencyOf() []string {
 
 func (pop *resourcePopulator) GetTechdocRef() string {
 	return "resource/"
+}
+
+func (pop *resourcePopulator) GetDisplayName() string {
+	return fmt.Sprintf("The %s ai model", pop.GetName())
 }
 
 type apiPopulator struct {
@@ -182,6 +219,10 @@ func (pop *apiPopulator) GetDefinition() string {
 
 func (pop *apiPopulator) GetTechdocRef() string {
 	return "api/"
+}
+
+func (pop *apiPopulator) GetDisplayName() string {
+	return fmt.Sprintf("The %s openapi", pop.GetName())
 }
 
 func SetupKServeClient(cfg *config.Config) {
@@ -211,25 +252,10 @@ func SetupKServeClient(cfg *config.Config) {
 
 func NewCmd(cfg *config.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "kserve",
-		Short: "KServe related API",
-		Long:  "Interact with KServe related instances on a K8s cluster to manage AI related catalog entities in a Backstage instance.",
-		Example: `
-# Both owner and lifecycle are required parameters.  Examine Backstage Catalog documentation for details.
-# This will query all the InferenceService instances in the current namespace and build Catalog Component, Resource, and
-# API Entities from the data.
-$ bkstg-ai new-model kserve <owner> <lifecycle> <args...>
-
-# This will set the URL, Token, and Skip TLS when accessing the cluster for InferenceService instances 
-$ bkstg-ai new-model kserve <owner> <lifecycle> --model-metadata-url=https://my-kubeflow.com --model-metadata-token=my-token --model-metadata-skip-tls=true
-
-# This will set the Kubeconfig file to use when accessing the cluster for InferenceService instances
-$ bkstg-ai new-model kserve <owner> <lifecycle> --kubeconfig=/home/myid/my-kube.json
-
-# This form will pull in only the InferenceService instances with the names 'inferenceservice1' and 'inferenceservice2'
-# in the 'my-datascience-project'namespace in order to build Catalog Component, Resource, and API Entities.
-$ bkstg-ai new-model kserve owner lifecycle inferenceservice1 inferenceservice2 --namespace my-datascience-project
-`,
+		Use:     "kserve",
+		Short:   "KServe related API",
+		Long:    "Interact with KServe related instances on a K8s cluster to manage AI related catalog entities in a Backstage instance.",
+		Example: strings.ReplaceAll(kserveExamples, "%s", util.ApplicationName),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ids := []string{}
 

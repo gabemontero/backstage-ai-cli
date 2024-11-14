@@ -7,6 +7,8 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+const ApplicationName = "bac"
+
 func PrintYaml(obj interface{}, addDivider bool, cmd *cobra.Command) error {
 	writer := printers.GetNewTabWriter(cmd.OutOrStdout())
 	output, err := yaml.Marshal(obj)

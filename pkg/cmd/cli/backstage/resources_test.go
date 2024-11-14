@@ -149,7 +149,10 @@ const (
             ],
             "dependencyOf": [
                 "component:ollama-model-service"
-            ]
+            ],
+            "profile": {
+                "displayName": "Microsoft Phi-3.5 Mini Instruct"
+            }
         }
     },
     {
@@ -234,7 +237,10 @@ const (
             ],
             "dependencyOf": [
                 "component:ollama-model-service"
-            ]
+            ],
+            "profile": {
+                "displayName": "IBM Granite Code Model 20B"
+            }
         }
     },
     {
@@ -324,7 +330,10 @@ const (
             ],
             "dependencyOf": [
                 "component:developer-model-service"
-            ]
+            ],
+            "profile": {
+                "displayName": "IBM Granite Code Model"
+            }
         }
     },
     {
@@ -409,7 +418,10 @@ const (
             ],
             "dependencyOf": [
                 "component:ollama-model-service"
-            ]
+            ],
+            "profile": {
+                "displayName": "Google Gemma2 2B"
+            }
         }
     },
     {
@@ -495,7 +507,10 @@ const (
             ],
             "dependencyOf": [
                 "component:ollama-model-service"
-            ]
+            ],
+            "profile": {
+                "displayName": "Meta Llama 3.2 1B"
+            }
         }
     }
 ]`
@@ -583,7 +598,10 @@ const (
             ],
             "dependencyOf": [
                 "component:ollama-model-service"
-            ]
+            ],
+            "profile": {
+                "displayName": "IBM Granite Code Model 20B"
+            }
         }
     },
     {
@@ -673,7 +691,10 @@ const (
             ],
             "dependencyOf": [
                 "component:developer-model-service"
-            ]
+            ],
+            "profile": {
+                "displayName": "IBM Granite Code Model"
+            }
         }
     },
     {
@@ -758,7 +779,10 @@ const (
             ],
             "dependencyOf": [
                 "component:ollama-model-service"
-            ]
+            ],
+            "profile": {
+                "displayName": "Google Gemma2 2B"
+            }
         }
     },
     {
@@ -844,7 +868,10 @@ const (
             ],
             "dependencyOf": [
                 "component:ollama-model-service"
-            ]
+            ],
+            "profile": {
+                "displayName": "Meta Llama 3.2 1B"
+            }
         }
     }
 ]`
@@ -933,7 +960,10 @@ const (
             ],
             "dependencyOf": [
                 "component:ollama-model-service"
-            ]
+            ],
+            "profile": {
+                "displayName": "Meta Llama 3.2 1B"
+            }
         }
     }
 ]`

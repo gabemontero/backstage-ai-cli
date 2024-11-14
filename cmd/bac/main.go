@@ -6,12 +6,11 @@ import (
 	"os"
 
 	"github.com/gabemontero/backstage-ai-cli/pkg/cmd/cli"
+	"github.com/gabemontero/backstage-ai-cli/pkg/util"
 	"github.com/spf13/pflag"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/klog/v2"
 )
-
-const ApplicationName = "bkstg-ai"
 
 var hiddenLogFlags = []string{
 	"add_dir_header",
@@ -46,7 +45,7 @@ func main() {
 // initGoFlags initializes the flag sets for klog.
 // Any flags for "-h" or "--help" are ignored because pflag will show the usage later with all subcommands.
 func initGoFlags() error {
-	flagset := goflag.NewFlagSet(ApplicationName, goflag.ContinueOnError)
+	flagset := goflag.NewFlagSet(util.ApplicationName, goflag.ContinueOnError)
 	goflag.CommandLine = flagset
 	klog.InitFlags(flagset)
 
@@ -61,7 +60,7 @@ func initGoFlags() error {
 
 // initPFlags initializes the pflags used by Cobra subcommands.
 func initPFlags() {
-	flags := pflag.NewFlagSet(ApplicationName, pflag.ExitOnError)
+	flags := pflag.NewFlagSet(util.ApplicationName, pflag.ExitOnError)
 	flags.AddGoFlagSet(goflag.CommandLine)
 	pflag.CommandLine = flags
 

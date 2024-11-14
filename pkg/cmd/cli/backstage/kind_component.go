@@ -44,4 +44,7 @@ type ComponentEntityV1alpha1Spec struct {
 
 	// System is an array of references to other entities that the component depends on to function.
 	System string `json:"system,omitempty" yaml:"system,omitempty"`
+
+	//FIX from schema
+	Profile Profile `json:"profile" yaml:"profile"`
 }

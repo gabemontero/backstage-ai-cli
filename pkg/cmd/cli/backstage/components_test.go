@@ -160,7 +160,10 @@ const (
             "dependsOn": [
                 "resource:ibm-granite-8b-code-instruct",
                 "api:model-service-api"
-            ]
+            ],
+            "profile": {
+                "displayName": "Developer Model Service"
+            }
         }
     },
     {
@@ -284,7 +287,10 @@ const (
                 "resource:gemma2-2b",
                 "resource:phi-mini-instruct",
                 "api:ollama-service-api"
-            ]
+            ],
+            "profile": {
+                "displayName": "Ollama Model Service"
+            }
         }
     }
 ]
@@ -380,7 +386,10 @@ const (
             "dependsOn": [
                 "resource:ibm-granite-8b-code-instruct",
                 "api:model-service-api"
-            ]
+            ],
+            "profile": {
+                "displayName": "Developer Model Service"
+            }
         }
     },
     {
@@ -504,7 +513,10 @@ const (
                 "resource:gemma2-2b",
                 "resource:phi-mini-instruct",
                 "api:ollama-service-api"
-            ]
+            ],
+            "profile": {
+                "displayName": "Ollama Model Service"
+            }
         }
     }
 ]`
@@ -599,7 +611,10 @@ const (
             "dependsOn": [
                 "resource:ibm-granite-8b-code-instruct",
                 "api:model-service-api"
-            ]
+            ],
+            "profile": {
+                "displayName": "Developer Model Service"
+            }
         }
     }
 ]`

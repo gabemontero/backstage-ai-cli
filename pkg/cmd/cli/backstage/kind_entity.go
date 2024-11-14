@@ -141,3 +141,8 @@ type EntityStatusItemError struct {
 	// An error stack trace
 	Stack *string `json:"stack" yaml:"stack"`
 }
+
+// fields currently not in the schema files, but we see them used by the console
+type Profile struct {
+	DisplayName string `json:"displayName" yaml:"displayName"`
+}

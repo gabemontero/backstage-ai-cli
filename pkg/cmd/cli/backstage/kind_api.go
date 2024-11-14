@@ -33,9 +33,12 @@ type ApiEntityV1alpha1Spec struct {
 	// Definition of the API, based on the format defined by the type.
 	Definition string `json:"definition" yaml:"definition"`
 
-	//GGM FIX
+	//FIX from schema
 	DependencyOf []string `json:"dependencyOf,omitempty" yaml:"dependencyOf,omitempty"`
 
 	// System is entity reference to the system that the API belongs to.
 	System string `json:"system,omitempty" yaml:"system,omitempty"`
+
+	//FIX from schema
+	Profile Profile `json:"profile" yaml:"profile"`
 }

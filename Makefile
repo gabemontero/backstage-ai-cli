@@ -1,4 +1,4 @@
-APP = bkstg-ai
+APP = bac
 OUTPUT_DIR ?= _output
 
 CMD = ./cmd/$(APP)/...

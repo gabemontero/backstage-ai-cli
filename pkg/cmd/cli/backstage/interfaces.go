@@ -15,6 +15,7 @@ type CommonPopulator interface {
 	GetTags() []string
 	GetProvidedAPIs() []string
 	GetTechdocRef() string
+	GetDisplayName() string
 }
 
 type ComponentPopulator interface {
@@ -47,6 +48,7 @@ func PrintComponent(pop ComponentPopulator, cmd *cobra.Command) error {
 		Owner:        "user:" + pop.GetOwner(),
 		ProvidesApis: pop.GetProvidedAPIs(),
 		DependsOn:    pop.GetDependsOn(),
+		Profile:      Profile{DisplayName: pop.GetDisplayName()},
 	}
 	err := util.PrintYaml(component, true, cmd)
 	if err != nil {
@@ -70,6 +72,7 @@ func PrintResource(pop ResourcePopulator, cmd *cobra.Command) error {
 		Lifecycle:    pop.GetLifecycle(),
 		ProvidesApis: pop.GetProvidedAPIs(),
 		DependencyOf: pop.GetDependencyOf(),
+		Profile:      Profile{DisplayName: pop.GetDisplayName()},
 	}
 	err := util.PrintYaml(resource, true, cmd)
 	if err != nil {
@@ -93,6 +96,7 @@ func PrintAPI(pop APIPopulator, cmd *cobra.Command) error {
 		Owner:        "user:" + pop.GetOwner(),
 		Definition:   pop.GetDefinition(),
 		DependencyOf: pop.GetDependencyOf(),
+		Profile:      Profile{DisplayName: pop.GetDisplayName()},
 	}
 	err := util.PrintYaml(api, false, cmd)
 	if err != nil {

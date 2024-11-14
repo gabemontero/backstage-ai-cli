@@ -30,12 +30,15 @@ type ResourceEntityV1alpha1Spec struct {
 	// Owner is an entity reference to the owner of the resource.
 	Owner string `json:"owner" yaml:"owner"`
 
-	//GGM FIX ProvidesApis is an array of entity references to the APIs that are provided by the component.
+	//FIX from schema ProvidesApis is an array of entity references to the APIs that are provided by the component.
 	ProvidesApis []string `json:"providesApis,omitempty" yaml:"providesApis,omitempty"`
 
-	//GGM FIX
+	//FIX from schema
 	DependencyOf []string `json:"dependencyOf,omitempty" yaml:"dependencyOf,omitempty"`
 
 	// System is an entity reference to the system that the resource belongs to.
 	System string `json:"system,omitempty" yaml:"system,omitempty"`
+
+	//FIX from schema
+	Profile Profile `json:"profile" yaml:"profile"`
 }
